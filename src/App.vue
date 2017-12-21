@@ -3,21 +3,22 @@
     <v-content>
       <v-card flat tile>
         <v-container fluid pa-0>
-          <v-layout row wrap>
-            <v-flex xs12 md6>
+          <v-layout row wrap justify-end>
+            <v-flex xs12 sm4 ma-1>
+              <v-select
+                label="Instrumente"
+                v-bind:items="instruments"
+                v-model="$store.state.instrument.selected"
+                multiple
+                autocomplete
+                clearable
+              ></v-select>
+            </v-flex>
+            <v-flex xs12 sm4 ma-1>
               <v-select
                 label="Jahre"
                 v-bind:items="years"
-                v-model="e7"
-                multiple
-                autocomplete
-              ></v-select>
-            </v-flex>
-            <v-flex xs12 md6>
-              <v-select
-                label="Instrumente"
-                v-bind:items="['Schweizer National Fond','Umwelttechnologie Förderung']"
-                v-model="e8"
+                v-model="$store.state.year.selected"
                 multiple
                 autocomplete
                 clearable
@@ -49,8 +50,11 @@
       }
     },
     computed: {
+      instruments() {
+        return this.$store.getters.instruments.map(o => { return { text: o.name, value: o.id } })
+      },
       years() {
-        return this.$store.state.years
+        return this.$store.getters.years.map(o => { return { text: o.name, value: o.id } })
       }
     }
   }
