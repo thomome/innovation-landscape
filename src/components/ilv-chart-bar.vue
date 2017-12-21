@@ -1,5 +1,5 @@
 <template>
-  <path :d="path"></path>
+  <path v-if="amount > 0" :d="path"></path>
 </template>
 
 <script>
@@ -12,18 +12,24 @@
     },
     computed: {
       path() {
-        const from = parseInt(this.from)
-        const to = parseInt(this.to)
-        const amount = parseInt(this.amount)
-        const w = to-from
-        const x = from+(w*0.5)
+        const axisSpace = this.$store.state.chart.axisSpace
+        const chartWidth = this.$store.state.chart.width-axisSpace
+        const chartHeight = this.$store.state.chart.height-axisSpace
+        const chartMaxAmount = this.$store.state.chart.maxAmount
+
+        const yScale = chartHeight/chartMaxAmount
+
+        const from = parseInt(this.from)*0.01
+        const to = parseInt(this.to)*0.01
+        const amount = parseInt(this.amount)*yScale
+
+        const w = (to-from)*chartWidth
+        const x = axisSpace+(from*chartWidth)+(w*0.5)
         const h = amount
-        const o = 200
-        const y = 500
+        const o = chartWidth/6
+        const y = chartHeight
 
         const r = -0.861*(((h*o*0.5)/(h*w*0.5))-1)-0.3088*Math.pow(((h*o*0.5)/(h*w*0.5))-1, 3)
-
-        console.log(x,y,w,h,o,r)
 
         let points = ''
         points += `M${ (x+w*0.5) },${ y } `
@@ -39,3 +45,10 @@
     }
   }
 </script>
+
+<style lang="scss" scoped>
+  path {
+    opacity: 0.5;
+    transition: all 0.3s;
+  }
+</style>
