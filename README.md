@@ -1,6 +1,4 @@
-# ilv
-
-> Swiss Innovation Landscape Visualization
+# Swiss Innovation Landscape
 
 ## Build Setup
 
