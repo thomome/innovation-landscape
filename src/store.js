@@ -35,7 +35,7 @@ export const store = new Vuex.Store({
         2: { id: 2, instrumentId: 1, year: 2012, amount: 26100000 },
         3: { id: 3, instrumentId: 1, year: 2013, amount: 9340000 },
         4: { id: 4, instrumentId: 2, year: 2011, amount: 834000 },
-        5: { id: 5, instrumentId: 2, year: 2012, amount: 1250000 },
+        5: { id: 5, instrumentId: 2, year: 2012, amount: 1240000 },
         6: { id: 6, instrumentId: 2, year: 2013, amount: 4450000 },
       }
     },
@@ -68,6 +68,7 @@ export const store = new Vuex.Store({
       return instrument.list.map(id => instrument.data[id])
     },
     instrumentsSelected({ instrument }) {
+      if(instrument.selected.length === 0) return instrument.list.map(id => instrument.data[id])
       return instrument.selected.map(id => instrument.data[id])
     },
     budgets({ budget }) {
