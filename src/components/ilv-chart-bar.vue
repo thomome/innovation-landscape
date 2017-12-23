@@ -15,7 +15,7 @@
         const axisSpace = this.$store.state.chart.axisSpace
         const chartWidth = this.$store.state.chart.width-axisSpace
         const chartHeight = this.$store.state.chart.height-axisSpace
-        const chartMaxAmount = this.$store.state.chart.maxAmount
+        const chartMaxAmount = this.$store.state.chart.axisMax
 
         const yScale = chartHeight/chartMaxAmount
 

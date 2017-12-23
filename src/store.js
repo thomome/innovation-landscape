@@ -15,7 +15,13 @@ export const store = new Vuex.Store({
       width: 1,
       height: 1,
       maxAmount: 1,
-      axisSpace: 30
+      axisSpace: 40,
+      units: [
+        { label: 'default', start: 0 },
+        { label: 'thousand', start: 3 },
+        { label: 'million', start: 6 },
+        { label: 'billion', start: 9 }
+      ]
     },
     instrument: { list: [1,2], selected: [],
       data: {
@@ -25,12 +31,12 @@ export const store = new Vuex.Store({
     },
     budget: { list: [1,2,3,4,5,6],
       data: {
-        1: { id: 1, instrumentId: 1, year: 2011, amount: 24000000 },
-        2: { id: 2, instrumentId: 1, year: 2012, amount: 26000000 },
-        3: { id: 3, instrumentId: 1, year: 2013, amount: 29000000 },
-        4: { id: 4, instrumentId: 2, year: 2011, amount: 10000000 },
-        5: { id: 5, instrumentId: 2, year: 2012, amount: 8000000 },
-        6: { id: 6, instrumentId: 2, year: 2013, amount: 6000000 },
+        1: { id: 1, instrumentId: 1, year: 2011, amount: 24400000 },
+        2: { id: 2, instrumentId: 1, year: 2012, amount: 26100000 },
+        3: { id: 3, instrumentId: 1, year: 2013, amount: 9340000 },
+        4: { id: 4, instrumentId: 2, year: 2011, amount: 834000 },
+        5: { id: 5, instrumentId: 2, year: 2012, amount: 1250000 },
+        6: { id: 6, instrumentId: 2, year: 2013, amount: 4450000 },
       }
     },
     year: { list: [2011,2012,2013], selected: [],
@@ -43,6 +49,12 @@ export const store = new Vuex.Store({
     cacheDuration: (1000*60*60*24*3) // 3 days
   },
   mutations: {
+    setChart({ chart }, data) {
+      const keys = Object.keys(data)
+      keys.forEach((v) => {
+        Vue.set(chart, v, data[v])
+      })
+    },
     setChartDimension({ chart }, data) {
       Vue.set(chart, 'width', data.width)
       Vue.set(chart, 'height', data.height)

@@ -1,7 +1,7 @@
 <template>
   <div class="chart-container">
     <svg width="100%" height="500px" ref="chart">
-      <ilv-chart-axis direction="y"></ilv-chart-axis>
+      <ilv-chart-axis-x direction="y"></ilv-chart-axis-x>
       <g class="bars">
         <ilv-chart-bar
           v-for="inst in instruments"
@@ -17,14 +17,15 @@
 
 <script>
   import ilvChartBar from './ilv-chart-bar.vue'
-  import ilvChartAxis from './ilv-chart-axis.vue'
+  import ilvChartAxisX from './ilv-chart-axis-x.vue'
+  import { roundNumber } from './../util.js'
 
   export default {
     data() {
       return {}
     },
     components: {
-      ilvChartBar, ilvChartAxis
+      ilvChartBar, ilvChartAxisX
     },
     computed: {
       instruments() {
@@ -51,11 +52,39 @@
         })
 
         const maxLength = maxAmount.toString().length
-        let maxCeil = Math.floor(maxAmount/Math.pow(10, maxLength-2))
-        maxCeil = Math.ceil(maxCeil/5)*5*(Math.pow(10, maxLength-2))
-        
-        this.$store.commit('setChartMaxAmount', {
-          maxAmount: maxCeil
+
+        let simpleMax = maxAmount/Math.pow(10, maxLength-2)*0.1
+
+        const dividers = [0.2, 0.25, 0.5, 1, 2, 2.5];
+        let divider = 1
+        for(let i = 0; i < dividers.length; i++) {
+          const v = dividers[i]
+          const tMax = Math.ceil(simpleMax/v)*v
+          const rest = tMax%v
+          const mult = tMax/v
+          if(rest === 0 && mult < 8 && mult > 3) {
+            divider = v
+            simpleMax = tMax
+            break;
+          }
+        }
+
+        const maxCeil = simpleMax*Math.pow(10, maxLength-2)*10
+
+        const units = this.$store.state.chart.units
+        let unit = 0
+        units.forEach((v, i) => {
+          const place =  Math.floor(maxAmount/Math.pow(10, v.start))
+          if(place >= 1){
+            unit = v.start
+          }
+        })
+
+        this.$store.commit('setChart', {
+          axisMax: maxCeil,
+          axisTics: simpleMax/divider,
+          axisDivider: divider,
+          axisUnit: unit
         })
 
         return instruments
