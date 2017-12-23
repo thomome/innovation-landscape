@@ -1,8 +1,8 @@
 <template>
   <g class="axis">
-    <g class="label" v-for="i in axisTics" :key="i" :transform="transform(i)">
+    <g class="label" v-for="i in axisTics" :key="label(i)" :transform="transform(i)">
       <path class="tic" d="M0,1 L-10,1"></path>
-      <path class="grid" d="M0,1 L600,1"></path>
+      <path class="grid" d="M0,1 L1500,1"></path>
       <text class="text" x="-2" y="6" text-anchor="end" alignment-baseline="hanging">
         {{ label(i) }}
       </text>
@@ -32,6 +32,9 @@
       },
       chartHeight() {
         return this.$store.state.chart.height
+      },
+      chartWidth() {
+        return this.$store.state.chart.width
       }
     },
     methods: {
@@ -41,6 +44,7 @@
         return `translate(${x}, ${y})`
       },
       label(i){
+        console.log(this.axisUnit)
         return roundNumber(Math.round(this.axisMax/this.axisTics*i/Math.pow(10, this.axisUnit-2))*0.01, 2)
       }
     }
@@ -55,10 +59,10 @@
       stroke: #000;
     }
     .grid {
-      opacity: 0;
+      opacity: 1;
       stroke-width: 1;
-      stroke: #ccc;
-      stroke-dasharray: 5;
+      stroke: #ddd;
+      stroke-dasharray: 3;
       shape-rendering:crispEdges;
     }
   }
