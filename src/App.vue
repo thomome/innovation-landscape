@@ -51,7 +51,7 @@
     },
     computed: {
       instruments() {
-        return this.$store.getters.instruments.map(o => { return { text: o.name, value: o.id } })
+        return this.$store.getters.instrumentsAll.map(o => { return { text: o.name, value: o.id } })
       },
       years() {
         return this.$store.getters.years.map(o => { return { text: o.name, value: o.id } })
