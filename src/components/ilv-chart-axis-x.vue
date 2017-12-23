@@ -44,7 +44,6 @@
         return `translate(${x}, ${y})`
       },
       label(i){
-        console.log(this.axisUnit)
         return roundNumber(Math.round(this.axisMax/this.axisTics*i/Math.pow(10, this.axisUnit-2))*0.01, 2)
       }
     }
