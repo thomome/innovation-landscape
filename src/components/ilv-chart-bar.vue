@@ -1,5 +1,5 @@
 <template>
-  <path v-if="amount > 0" :d="path"></path>
+  <path v-if="amount > 0" :d="path" :fill="pathFill"></path>
 </template>
 
 <script>
@@ -11,16 +11,23 @@
       }
     },
     computed: {
+      pathFill() {
+        const max = this.$store.getters.yAxisMax
+        const hue = this.amount/max*180
+        return `hsla(${hue}, 25%, 50%, 1)`
+      },
       path() {
         const axisSpace = this.$store.state.chart.axisSpace
         const chartWidth = this.$store.state.chart.width-axisSpace
         const chartHeight = this.$store.state.chart.height-axisSpace
-        const chartMaxAmount = this.$store.state.chart.axisMax
+        const yAxis = this.$store.getters.yAxis
+        const xAxis = this.$store.getters.xAxis
 
-        const yScale = chartHeight/chartMaxAmount
+        const yScale = chartHeight/yAxis.max
+        const xScale = 1/this.$store.state.phase.list.length
 
-        const from = parseInt(this.from)*0.01
-        const to = parseInt(this.to)*0.01
+        const from = parseInt(this.from)*xScale
+        const to = parseInt(this.to)*xScale
         const amount = parseInt(this.amount)*yScale
 
         const w = (to-from)*chartWidth
@@ -48,7 +55,12 @@
 
 <style lang="scss" scoped>
   path {
-    opacity: 0.5;
-    transition: all 0.3s;
+    opacity: 0.8;
+    transition: all 0.3s, opacity 0.1s;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 </style>
