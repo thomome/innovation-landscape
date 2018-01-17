@@ -1,15 +1,17 @@
 <template>
   <div class="chart-container">
     <svg width="100%" height="500px" ref="chart">
-      <ilv-chart-axis-x direction="y"></ilv-chart-axis-x>
+      <ilv-chart-y-axis direction="y"></ilv-chart-y-axis>
       <g class="bars">
-        <ilv-chart-bar
-          v-for="inst in instruments"
-          :key="'instrument-' + inst.id"
-          :from="inst.from"
-          :to="inst.to"
-          :amount="inst.amount"
-        ></ilv-chart-bar>
+        <transition-group tag="g" name="bars">
+          <ilv-chart-bar
+            v-for="inst in instruments"
+            :key="'instrument-' + inst.id"
+            :from="inst.from"
+            :to="inst.to"
+            :amount="inst.amount"
+          ></ilv-chart-bar>
+        </transition-group>
       </g>
     </svg>
   </div>
@@ -17,19 +19,19 @@
 
 <script>
   import ilvChartBar from './ilv-chart-bar.vue'
-  import ilvChartAxisX from './ilv-chart-axis-x.vue'
-  import { roundNumber } from './../util.js'
+  import ilvChartYAxis from './ilv-chart-y-axis.vue'
+
 
   export default {
     data() {
       return {}
     },
     components: {
-      ilvChartBar, ilvChartAxisX
+      ilvChartBar, ilvChartYAxis
     },
     computed: {
       instruments() {
-        return this.$store.getters.instruments;
+        return this.$store.getters.availableInstruments;
       }
     },
     methods: {
@@ -44,6 +46,13 @@
     mounted: function () {
       this.updateSize()
       window.addEventListener('resize', this.updateSize)
+      document.body.addEventListener('wheel', (e) => {
+        const mult = e.deltaY < 0 ? -1 : 1
+        const zoom = this.$store.state.chart.zoom
+        this.$store.commit('setChartZoom', {
+          zoom: zoom + (zoom*0.1*mult)
+        })
+      })
     },
     beforeDestroy: function () {
       window.removeEventListener('resize', this.updateSize)
@@ -65,5 +74,13 @@
       top: 0;
       left: 0;
     }
+  }
+
+  .bars-enter-active, .bars-leave-active {
+    transition: transform .3s;
+    transform-origin: center bottom;
+  }
+  .bars-enter, .bars-leave-to {
+    transform: scaleY(0);
   }
 </style>
