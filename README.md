@@ -1,8 +1,10 @@
-# Swiss Innovation Landscape
+# Innovationslandschaft Schweiz
 
-## Build Setup
+> Förderinstrumente im Umwelt- und Energiebereich.
 
-``` bash
+Die Visualisierung wurde mit JavaScript/Vue realisiert. Der Webpack Build `dist` kann heruntergeladen werden und direkt verwendet werden. Zur Bearbeitung der Visualisierung ist `node` und `npm` notwendig.
+
+```bash
 # install dependencies
 npm install
 
@@ -13,4 +15,4 @@ npm run dev
 npm run build
 ```
 
-For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
+Die Daten in `/src/data/` sind nicht aktuell, da Datenbankanpassungen nicht in GitHub gemacht werden.
