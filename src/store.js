@@ -12,10 +12,10 @@ export const store = new Vuex.Store({
       terms: {}
     },
     chart: {
-      width: 1,
-      height: 1,
-      maxAmount: 1,
-      axisSpace: 40,
+      width: null,
+      height: null,
+      zoom: 1,
+      axisSpace: 60,
       units: [
         { label: 'default', start: 0 },
         { label: 'thousand', start: 3 },
@@ -23,37 +23,41 @@ export const store = new Vuex.Store({
         { label: 'billion', start: 9 }
       ]
     },
-    instrument: { list: [1,2], selected: [],
+    instrument: { list: [1,2,3], selected: [],
       data: {
-        1: { id: 1, name: 'SNF', from: 0, to: 25 },
-        2: { id: 2, name: 'UTF', from: 30, to: 45 }
+        1: { id: 1, name: 'Schweizer National Fond', regionId: 2, from: 0.1, to: 2, budget: { t: 80000000, a: 60000000, u: 10000000, e: 20000000 } },
+        2: { id: 2, name: 'Umwelttechnologie Förderung', regionId: 2, from: 1.5, to: 3, budget: { t: 4000000, a: 0, u: 4000000, e: 0 } },
+        3: { id: 3, name: 'Forstforschung', regionId: 1, from: 3, to: 4.5, amount: 8034000, budget: {  t: 4000000, a: 0, u: 4000000, e: 0 } },
       }
     },
-    budget: { list: [1,2,3,4,5,6],
+    region: { list: [1,2], selected: [],
       data: {
-        1: { id: 1, instrumentId: 1, year: 2011, amount: 24400000 },
-        2: { id: 2, instrumentId: 1, year: 2012, amount: 26100000 },
-        3: { id: 3, instrumentId: 1, year: 2013, amount: 9340000 },
-        4: { id: 4, instrumentId: 2, year: 2011, amount: 834000 },
-        5: { id: 5, instrumentId: 2, year: 2012, amount: 1240000 },
-        6: { id: 6, instrumentId: 2, year: 2013, amount: 4450000 },
+        1: { id: 1, name: 'EU' },
+        2: { id: 2, name: 'CH' }
       }
     },
-    year: { list: [2011,2012,2013], selected: [],
+    category: { list: [1,2,3], selected: [],
       data: {
-        2011: { id: 2011, name: 2011 },
-        2012: { id: 2012, name: 2012 },
-        2013: { id: 2013, name: 2013 }
+        1: { id: 1, name: 'Allegmein' },
+        2: { id: 2, name: 'Umwelt' },
+        3: { id: 3, name: 'Energie' }
+      }
+    },
+    phase: { list: [1,2,3,4,5,6],
+      data: {
+        1: { id: 1, name: 'Grundlagenforschung' },
+        2: { id: 2, name: 'Angewandte Forschung' },
+        3: { id: 3, name: 'Laborprototypen' },
+        4: { id: 4, name: 'Pilotierung & Demonstration' },
+        5: { id: 5, name: 'Marktzulassung- & einführung' },
+        6: { id: 6, name: 'Marktdiffusion & Exportförderung' },
       }
     },
     cacheDuration: (1000*60*60*24*3) // 3 days
   },
   mutations: {
-    setChart({ chart }, data) {
-      const keys = Object.keys(data)
-      keys.forEach((v) => {
-        Vue.set(chart, v, data[v])
-      })
+    setChartZoom({ chart }, data) {
+      Vue.set(chart, 'zoom', data.zoom)
     },
     setChartDimension({ chart }, data) {
       Vue.set(chart, 'width', data.width)
@@ -64,46 +68,72 @@ export const store = new Vuex.Store({
     }
   },
   getters: {
-    instrumentsAll({ instrument }) {
+    allPhases({ phase }) {
+      return phase.list.map(id => phase.data[id])
+    },
+
+    allCategories({ category }) {
+      return category.list.map(id => category.data[id])
+    },
+    availableCategories({ category }) {
+      return category.list.map(id => category.data[id]) // Replace with available
+    },
+
+    allRegions({ region }) {
+      return region.list.map(id => region.data[id])
+    },
+    availableRegions({ region }){
+      return region.list.map(id => region.data[id]) // Replace with available
+    },
+
+    allInstruments({ instrument }) {
       return instrument.list.map(id => instrument.data[id])
     },
-    instrumentsSelected({ instrument }) {
-      if(instrument.selected.length === 0) return instrument.list.map(id => instrument.data[id])
-      return instrument.selected.map(id => instrument.data[id])
-    },
-    budgetsAll({ budget }) {
-      return budget.list.map(id => budget.data[id])
-    },
-    years({ year }) {
-      return year.list.map(id => year.data[id])
-    },
+    availableInstruments(state, getters) {
+      const selectedRegions = state.region.selected
+      const selectedInstruments = state.instrument.selected
+      const selectedCategories = state.category.selected
 
-    instruments(state, getters) {
-      const amounts = {}
-      const totals = {}
-      const years = state.year.selected
+      const instruments = getters.allInstruments.filter((v) => {
+        const cI = (selectedInstruments.indexOf(v.id) !== -1 || selectedInstruments.length === 0)
+        const cR = (selectedRegions.indexOf(v.regionId) !== -1 || selectedRegions.length === 0)
+        const cC = (selectedCategories.indexOf(v.categoryId) !== -1 || selectedCategories.length === 0)
 
-      getters.budgetsAll.forEach((o, i) => {
-        if(!amounts[o.instrumentId]) {
-          amounts[o.instrumentId] = []
-          totals[o.instrumentId] = 0
-        }
-        if(years.indexOf(o.year) !== -1 || years.length === 0){
-          amounts[o.instrumentId].push(o)
-          totals[o.instrumentId] += o.amount
+        if(cI && cR && cC) {
+          return true
         }
       })
 
+      store.commit('setChartZoom', { zoom: 1 })
+
+      return instruments
+    },
+    xAxis(state, getters) {
+      const instruments = getters.availableInstruments
+      let minFrom = Infinity
+      let maxTo = 0
+      instruments.forEach((v) => {
+        if(minFrom > v.from) minFrom = v.from
+        if(maxTo < v.to) maxTo = v.to
+      })
+      return {
+        from: Math.floor(minFrom),
+        to: Math.ceil(maxTo),
+        tics: Math.ceil(maxTo) - Math.floor(minFrom)
+      }
+    },
+    yAxisMax(state, getters) {
+      const instruments = getters.availableInstruments
+      const zoom = state.chart.zoom
       let maxAmount = 0
-      const instruments = getters.instrumentsSelected.map(o => {
-        if(totals[o.id] > maxAmount) maxAmount = totals[o.id]
-        o.amounts = amounts[o.id]
-        o.amount = totals[o.id]
-        return o
+      instruments.forEach((v) => {
+        if(v.amount > maxAmount) maxAmount = v.amount
       })
-
+      return Math.round(maxAmount*zoom)
+    },
+    yAxis(state, getters) {
+      const maxAmount = getters.yAxisMax
       const maxLength = maxAmount.toString().length
-
       let simpleMax = maxAmount/Math.pow(10, maxLength-2)*0.1
 
       const dividers = [0.2, 0.25, 0.5, 1, 2, 2.5];
@@ -123,22 +153,20 @@ export const store = new Vuex.Store({
       const maxCeil = simpleMax*Math.pow(10, maxLength-2)*10
 
       const units = state.chart.units
-      let unit = 0
+      let unit = {}
       units.forEach((v, i) => {
         const place =  Math.floor(maxAmount/Math.pow(10, v.start))
         if(place >= 1){
-          unit = v.start
+          unit = v
         }
       })
 
-      store.commit('setChart', {
-        axisMax: maxCeil,
-        axisTics: simpleMax/divider,
-        axisDivider: divider,
-        axisUnit: unit
-      })
-
-      return instruments
+      return {
+        max: maxCeil,
+        tics: simpleMax/divider,
+        divider: divider,
+        unit: unit
+      }
     }
   },
   actions: {}
