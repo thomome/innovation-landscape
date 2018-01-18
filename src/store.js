@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import Papa from 'papaparse'
 
 import { intersect, setHashParams, ajax } from './util.js'
 
@@ -23,37 +24,11 @@ export const store = new Vuex.Store({
         { label: 'billion', start: 9 }
       ]
     },
-    instrument: { list: [1,2,3], selected: [],
-      data: {
-        1: { id: 1, name: 'Schweizer National Fond', regionId: 2, from: 0.1, to: 2, budget: { t: 80000000, a: 60000000, u: 10000000, e: 20000000 } },
-        2: { id: 2, name: 'Umwelttechnologie Förderung', regionId: 2, from: 1.5, to: 3, budget: { t: 4000000, a: 0, u: 4000000, e: 0 } },
-        3: { id: 3, name: 'Forstforschung', regionId: 1, from: 3, to: 4.5, amount: 8034000, budget: {  t: 4000000, a: 0, u: 4000000, e: 0 } },
-      }
-    },
-    region: { list: [1,2], selected: [],
-      data: {
-        1: { id: 1, name: 'EU' },
-        2: { id: 2, name: 'CH' }
-      }
-    },
-    category: { list: [1,2,3], selected: [],
-      data: {
-        1: { id: 1, name: 'Allegmein' },
-        2: { id: 2, name: 'Umwelt' },
-        3: { id: 3, name: 'Energie' }
-      }
-    },
-    phase: { list: [1,2,3,4,5,6],
-      data: {
-        1: { id: 1, name: 'Grundlagenforschung' },
-        2: { id: 2, name: 'Angewandte Forschung' },
-        3: { id: 3, name: 'Laborprototypen' },
-        4: { id: 4, name: 'Pilotierung & Demonstration' },
-        5: { id: 5, name: 'Marktzulassung- & einführung' },
-        6: { id: 6, name: 'Marktdiffusion & Exportförderung' },
-      }
-    },
-    cacheDuration: (1000*60*60*24*3) // 3 days
+    instrument: { list: [], selected: [], data: {} },
+    region: { list: [], selected: [], data: {} },
+    category: { list: [], selected: [], data: {} },
+    phase: { list: [], data: {} },
+    cacheDuration: 0 //(1000*60*60*24*3) // 3 days
   },
   mutations: {
     setChartZoom({ chart }, data) {
@@ -65,36 +40,64 @@ export const store = new Vuex.Store({
     },
     setChartMaxAmount({ chart }, data) {
       Vue.set(chart, 'maxAmount', data.maxAmount)
+    },
+    initTable(state, data) {
+      const tableData = {}
+      const tableList = []
+      data.data.forEach(v => {
+        tableData[v.id] = v
+        tableList.push(v.id)
+      })
+
+      Vue.set(state[data.table], 'list', tableList)
+      Vue.set(state[data.table], 'data', tableData)
     }
   },
   getters: {
-    allPhases({ phase }) {
+    phaseAll({ phase }) {
       return phase.list.map(id => phase.data[id])
     },
-
-    allCategories({ category }) {
+    categoryAll({ category }) {
       return category.list.map(id => category.data[id])
     },
-    availableCategories({ category }) {
-      return category.list.map(id => category.data[id]) // Replace with available
-    },
-
-    allRegions({ region }) {
+    regionAll({ region }) {
       return region.list.map(id => region.data[id])
     },
-    availableRegions({ region }){
-      return region.list.map(id => region.data[id]) // Replace with available
-    },
-
-    allInstruments({ instrument }) {
+    instrumentAll({ instrument }) {
       return instrument.list.map(id => instrument.data[id])
     },
-    availableInstruments(state, getters) {
+
+    phaseSelected({ phase }) {
+      return phase.selected.map(id => phase.data[id])
+    },
+    categorySelected({ category }) {
+      return category.selected.map(id => category.data[id])
+    },
+    regionSelected({ region }) {
+      return region.selected.map(id => region.data[id])
+    },
+    instrumentSelected({ instrument }) {
+      return instrument.selected.map(id => instrument.data[id])
+    },
+
+    phaseAvailable({ phase }) {
+      return phase.available.map(id => phase.data[id])
+    },
+    categoryAvailable({ category }) {
+      return category.available.map(id => category.data[id])
+    },
+    regionAvailable({ region }) {
+      return region.available.map(id => region.data[id])
+    },
+    instrumentAvailable({ instrument }) {
+      return instrument.available.map(id => instrument.data[id])
+    },
+    instrumentAvailable(state, getters) {
       const selectedRegions = state.region.selected
       const selectedInstruments = state.instrument.selected
       const selectedCategories = state.category.selected
 
-      const instruments = getters.allInstruments.filter((v) => {
+      const instruments = getters.instrumentAll.filter(v => {
         const cI = (selectedInstruments.indexOf(v.id) !== -1 || selectedInstruments.length === 0)
         const cR = (selectedRegions.indexOf(v.regionId) !== -1 || selectedRegions.length === 0)
         const cC = (selectedCategories.indexOf(v.categoryId) !== -1 || selectedCategories.length === 0)
@@ -108,11 +111,12 @@ export const store = new Vuex.Store({
 
       return instruments
     },
+
     xAxis(state, getters) {
       const instruments = getters.availableInstruments
       let minFrom = Infinity
       let maxTo = 0
-      instruments.forEach((v) => {
+      instruments.forEach(v => {
         if(minFrom > v.from) minFrom = v.from
         if(maxTo < v.to) maxTo = v.to
       })
@@ -126,8 +130,8 @@ export const store = new Vuex.Store({
       const instruments = getters.availableInstruments
       const zoom = state.chart.zoom
       let maxAmount = 0
-      instruments.forEach((v) => {
-        if(v.amount > maxAmount) maxAmount = v.amount
+      instruments.forEach(v => {
+        if(v.budget.t > maxAmount) maxAmount = v.budget.t
       })
       return Math.round(maxAmount*zoom)
     },
@@ -169,5 +173,157 @@ export const store = new Vuex.Store({
       }
     }
   },
-  actions: {}
+  actions: {
+    loadRegionTable({ commit, state, dispatch }) {
+      return new Promise((resolve, reject) => {
+        dispatch('loadTable', { table: 'region' }).then(data => {
+          if(data) {
+            const preparedData = data.map(v => {
+              return {
+                id: v.id,
+                short: v.short,
+                en: v.en,
+                de: v.de,
+                fr: v.fr,
+                it: v.it
+              }
+            })
+            commit('initTable', { table: 'region', data: preparedData })
+            dispatch('saveTable', { table: 'region', data: preparedData })
+            resolve()
+          }
+        }, err => {
+          reject(err)
+        })
+      })
+    },
+    loadCategoryTable({ commit, state, dispatch }) {
+      return new Promise((resolve, reject) => {
+        dispatch('loadTable', { table: 'category' }).then(data => {
+          if(data) {
+            const preparedData = data.map(v => {
+              return {
+                id: v.id,
+                en: v.en,
+                de: v.de,
+                fr: v.fr,
+                it: v.it
+              }
+            })
+            commit('initTable', { table: 'category', data: preparedData })
+            dispatch('saveTable', { table: 'category', data: preparedData })
+            resolve()
+          }
+        }, err => {
+          reject(err)
+        })
+      })
+    },
+    loadPhaseTable({ commit, state, dispatch }) {
+      return new Promise(( resolve, reject ) => {
+        dispatch('loadTable', { table: 'phase' }).then(data => {
+          if(data) {
+            const preparedData = data.map(v => {
+              return {
+                id: v.id,
+                en: v.en,
+                de: v.de,
+                fr: v.fr,
+                it: v.it
+              }
+            })
+            commit('initTable', { table: 'phase', data: preparedData })
+            dispatch('saveTable', { table: 'phase', data: preparedData })
+            resolve()
+          }
+        }, err => {
+          reject(err)
+        })
+      })
+    },
+    loadInstrumentTable({ commit, state, dispatch, getters }) {
+      return new Promise((resolve, reject) => {
+        dispatch('loadTable', { table: 'instrument' }).then(data => {
+          if(data) {
+            const preparedData = data.map(v => {
+              const categories = getters.categoryAll
+              const items = []
+              const categoryIds = []
+              const checkCategoryIds = {}
+
+              categories.forEach(c => {
+                if(v[c.en]) {
+                  if(v[c.en] > 0) {
+                    items.push({ categoryIds: [c.id], amount: v[c.en] })
+                    if(!checkCategoryIds[c.id]){
+                      categoryIds.push(c.id)
+                      checkCategoryIds[c.id] = true
+                    }
+                  }
+                }
+              })
+              if(v.environment_energy) {
+                if(v.environment_energy > 0) {
+                  const ids = []
+                  categories.forEach(c => {
+                    if(c.en === 'energy' || c.en === 'environment') {
+                      ids.push(c.id)
+                      if(!checkCategoryIds[c.id]){
+                        categoryIds.push(c.id)
+                        checkCategoryIds[c.id] = true
+                      }
+                    }
+                  })
+                  items.push({ categoryIds: ids, amount: v.environment_energy })
+                }
+              }
+
+              return {
+                id: v.id,
+                institution: v.institution,
+                instrument: v.instrument,
+                regionId: v.regionId,
+                categoryIds: categoryIds,
+                from: v.from,
+                to: v.to,
+                budget: {
+                  total: v.total,
+                  items: items
+                }
+              }
+            })
+            commit('initTable', { table: 'instrument', data: preparedData })
+            dispatch('saveTable', { table: 'instrument', data: preparedData })
+            resolve()
+          }
+        }, err => {
+          reject(err)
+        })
+      })
+    },
+
+    saveTable({ commit, state }, data) {
+      localStorage.setItem(`db-${data.table}`, JSON.stringify(data.data))
+      if(data.table === 'instrument') localStorage.setItem('db-date', Date.now())
+    },
+
+    loadTable({commit, state}, data) {
+      return new Promise((resolve, reject) => {
+        const dbDate = localStorage.getItem('db-date')
+        const dbTable = localStorage.getItem(`db-${data.table}`)
+        if((Date.now() - dbDate) < state.cacheDuration && dbTable){
+          commit('initData', { table: data.table, data: JSON.parse(dbTable) })
+          resolve(false)
+        } else {
+          ajax(`./public/data/${data.table}.csv`, data => {
+            const parsedCSV = Papa.parse(data, { header: true, skipEmptyLines: true })
+            resolve(parsedCSV.data)
+          }, err => {
+            reject(`${err} (${data.table})`)
+          })
+        }
+      })
+    }
+
+  }
 })
