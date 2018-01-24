@@ -12,18 +12,6 @@ export const store = new Vuex.Store({
       selected: 'de',
       terms: {}
     },
-    chart: {
-      width: 0,
-      height: 0,
-      zoom: 1,
-      axisSpace: 60,
-      units: [
-        { label: 'default', start: 0 },
-        { label: 'thousand', start: 3 },
-        { label: 'million', start: 6 },
-        { label: 'billion', start: 9 }
-      ]
-    },
     instrument: { list: [], data: {}, selected: [], available: [] },
     region: { list: [], data: {}, selected: [], available: [] },
     category: { list: [], data: {}, selected: [], available: [] },
@@ -31,16 +19,6 @@ export const store = new Vuex.Store({
     cacheDuration: 0 //(1000*60*60*24*3) // 3 days,
   },
   mutations: {
-    setChartZoom({ chart }, data) {
-      Vue.set(chart, 'zoom', data.zoom)
-    },
-    setChartDimension({ chart }, data) {
-      Vue.set(chart, 'width', data.width)
-      Vue.set(chart, 'height', data.height)
-    },
-    setChartMaxAmount({ chart }, data) {
-      Vue.set(chart, 'maxAmount', data.maxAmount)
-    },
     initTable(state, data) {
       const tableData = {}
       const tableList = []
@@ -107,9 +85,6 @@ export const store = new Vuex.Store({
         }
       })
 
-
-      store.commit('setChartZoom', { zoom: 1 })
-
       const sortedInstruments = instruments.sort((a,b) => { return a.layer - b.layer })
 
       return sortedInstruments
@@ -127,61 +102,6 @@ export const store = new Vuex.Store({
         from: Math.floor(minFrom),
         to: Math.ceil(maxTo),
         tics: Math.ceil(maxTo) - Math.floor(minFrom)
-      }
-    },
-    yAxisMax(state, getters) {
-      const instruments = getters.instrumentAvailable
-      const categorySelected = state.category.selected
-      const zoom = state.chart.zoom
-      let maxAmount = 0
-      instruments.forEach(v => {
-        if(categorySelected.length === 0) {
-          if(v.budget.total > maxAmount) maxAmount = v.budget.total
-        } else {
-          v.budget.items.forEach(b => {
-            if(intersect(b.categoryIds, categorySelected).length !== 0){
-              if(b.amount > maxAmount) maxAmount = b.amount
-            }
-          })
-        }
-      })
-      return Math.round(maxAmount*zoom)
-    },
-    yAxis(state, getters) {
-      const maxAmount = getters.yAxisMax
-      const maxLength = maxAmount.toString().length
-      let simpleMax = maxAmount/Math.pow(10, maxLength-2)*0.1
-
-      const dividers = [0.2, 0.25, 0.5, 1, 2, 2.5];
-      let divider = 1
-      for(let i = 0; i < dividers.length; i++) {
-        const v = dividers[i]
-        const tMax = Math.ceil(simpleMax/v)*v
-        const rest = tMax%v
-        const mult = tMax/v
-        if(rest === 0 && mult < 8 && mult > 3) {
-          divider = v
-          simpleMax = tMax
-          break;
-        }
-      }
-
-      const maxCeil = simpleMax*Math.pow(10, maxLength-2)*10
-
-      const units = state.chart.units
-      let unit = {}
-      units.forEach((v, i) => {
-        const place =  Math.floor(maxAmount/Math.pow(10, v.start))
-        if(place >= 1){
-          unit = v
-        }
-      })
-
-      return {
-        max: maxCeil,
-        tics: simpleMax/divider,
-        divider: divider,
-        unit: unit
       }
     }
   },
