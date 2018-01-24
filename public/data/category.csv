@@ -1,4 +1,4 @@
-﻿id,en,de
-1,general,Allgemein
-2,environment,Umwelt
-3,energy,Energie
+﻿id,en,de,fr,it,total,color
+1,general,Allgemein,general,general,true,#A3D1E3
+2,environment,Umwelt,environment,environment,false,#9BF2DC
+3,energy,Energie,energy,energy,false,#FFFBC2
