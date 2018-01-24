@@ -1,5 +1,6 @@
 <template>
   <g>
+    <transition-group name="fade" tag="g">
       <ilv-chart-bar-peak
         v-for="(budget, index) in budgetItems"
         :key="`${instrument.id}-${budget.categoryIds.join('-')}`"
@@ -8,8 +9,11 @@
         :budget="budget"
         :index="index"
         :layer="instrument.id"
+        :chart="chart"
       ></ilv-chart-bar-peak>
+    </transition-group>
   </g>
+
 </template>
 
 <script>
@@ -18,7 +22,7 @@
 
   export default {
     components: { ilvChartBarPeak },
-    props: ['instrument', 'instrumentIndex'],
+    props: ['instrument', 'instrumentIndex', 'chart'],
     data () {
       return {
 
@@ -37,5 +41,11 @@
 </script>
 
 <style lang="scss" scoped>
-
+  .fade-enter-active, .fade-leave-active {
+    transition: transform .5s;
+    transform-origin: center bottom;
+  }
+  .fade-enter, .fade-leave-to {
+    transform: scale(1, 0)
+  }
 </style>
