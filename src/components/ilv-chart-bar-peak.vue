@@ -6,7 +6,7 @@
   import Color from 'color'
 
   export default {
-    props: ['from', 'to', 'budget', 'index', 'layer'],
+    props: ['from', 'to', 'budget', 'index', 'layer', 'chart'],
     data () {
       return {}
     },
@@ -28,25 +28,24 @@
         return color.rgb().string()
       },
       path() {
-        const axisSpace = this.$store.state.chart.axisSpace
-        const chartWidth = this.$store.state.chart.width-axisSpace
-        const chartHeight = this.$store.state.chart.height-axisSpace
-        const yAxis = this.$store.getters.yAxis
-        const xAxis = this.$store.getters.xAxis
+        const chart = this.chart
+        const axisSpace = chart.spacing
+        const chartWidth = chart.size.width-axisSpace
+        const chartHeight = chart.size.height-axisSpace
 
-        const yScale = chartHeight/yAxis.max
+        const yScale = chartHeight/(chart.max)
         const xScale = 1/this.$store.state.phase.list.length
 
         const from = parseInt(this.from)*xScale
         const to = parseInt(this.to)*xScale
         const amount = parseInt(this.budget.amount)*yScale
 
-
         const w = (to-from)*chartWidth
         const x = axisSpace+(from*chartWidth)+(w*0.5)
         const h = amount
         const o = chartWidth/6
         const y = chartHeight
+
 
         const r = -0.861*(((h*o*0.5)/(h*w*0.5))-1)-0.3088*Math.pow(((h*o*0.5)/(h*w*0.5))-1, 3)
 
@@ -69,14 +68,21 @@
   path {
     opacity: 1;
     shape-rendering: auto;
-    transition: all 0.3s, opacity 0.1s;
     cursor: pointer;
 
     &.outline {
-      /*opacity: 0.3;
+      opacity: 0.2;
       stroke: #000;
+      fill: rgba(255,255,255,0);
       stroke-width: 1px;
-      stroke-dasharray: 3px 3px;*/
+      stroke-dasharray: 3px 3px;
+
+      &:hover {
+        mix-blend-mode: soft-light;
+        fill: rgba(255,255,255,1);
+        stroke: #fff;
+        opacity: 0.6;
+      }
     }
   }
 </style>
