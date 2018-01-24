@@ -3,11 +3,11 @@
     <text class="legend" x="0" y="0" :transform="legendTransform">
       {{ legendText }}
     </text>
-    <g class="label" v-for="i in yAxis.tics" :key="key(i)" :transform="transform(i)">
+    <g class="label" v-for="tic in tics" :key="tic.id" :transform="`translate(${tic.x}, ${tic.y})`">
       <path class="tic" d="M0,1 L-10,1"></path>
       <path class="grid" d="M0,1 L1500,1"></path>
       <text class="text" x="-2" y="6" text-anchor="end" alignment-baseline="hanging">
-        {{ label(i) }}
+        {{ tic.number }}
       </text>
     </g>
   </g>
@@ -17,42 +17,56 @@
   import { roundNumber } from './../util.js'
 
   export default {
+    props: ['chart'],
     data () {
-      return {}
+      return {
+        label: 'mio'
+      }
     },
     computed: {
-      yAxis() {
-        return this.$store.getters.yAxis
+      tics() {
+        const axis = this.axis
+        const tics = []
+        for (let i = 0; i < this.chart.max*1.3; i += axis.ticSize) {
+          tics.push({
+            id: `${i}-${this.label}`,
+            number: roundNumber(i * Math.pow(10, this.chart.unit.start * -1), 2),
+            x: this.chart.spacing,
+            y: (this.chart.size.height-this.chart.spacing) - ((this.chart.size.height-this.chart.spacing) / this.chart.max * i)
+          })
+        }
+        return tics
       },
-      axisSpace() {
-        return this.$store.state.chart.axisSpace
-      },
-      chartHeight() {
-        return this.$store.state.chart.height
-      },
-      chartWidth() {
-        return this.$store.state.chart.width
+      axis() {
+        const dividers = [25,20,10,5,2.5,2,1]
+        const maxValue = this.chart.max
+        const maxValueLength = parseInt(maxValue).toString().length
+
+        const maxUnitValue = (maxValue * Math.pow(10, (maxValueLength-2)*-1))
+
+        let divider = null
+        let steps = null
+
+        dividers.some(v => {
+          const tempMaxValue = (Math.ceil(maxUnitValue * (1/v)) / (1/v)).toFixed(2)
+          const multiplier = tempMaxValue / v
+          if(multiplier < 10) {
+            divider = v
+            steps = multiplier
+          } else {
+            return true
+          }
+        })
+
+        return { ticSize: divider * Math.pow(10, maxValueLength-2), ticCount: steps }
       },
       legendTransform() {
-        const top = (this.chartHeight - this.axisSpace)*0.5
-        const left = this.axisSpace*0.33;
+        const top = (this.chart.size.height - this.chart.spacing)*0.5
+        const left = this.chart.spacing*0.33;
         return `translate(${left} ${top}) rotate(-90)`
       },
       legendText() {
-        return `In ${this.yAxis.unit.label} Franken`
-      }
-    },
-    methods: {
-      transform(i){
-        const x = this.axisSpace
-        const y = (this.yAxis.tics-i)*(this.chartHeight-this.axisSpace)/this.yAxis.tics
-        return `translate(${x}, ${y})`
-      },
-      key(i) {
-        return Math.round(this.yAxis.max/this.yAxis.tics*i)
-      },
-      label(i){
-        return roundNumber(Math.round(this.yAxis.max/this.yAxis.tics*i/Math.pow(10, this.yAxis.unit.start - 2))*0.01, 2)
+        return `In ${this.chart.unit.label} Franken`
       }
     }
   }
@@ -66,7 +80,6 @@
     font-size: 1.15rem;
   }
   .label {
-    transition: all 0.3s;
 
     .tic {
       stroke: #000;
