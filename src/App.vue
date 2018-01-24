@@ -7,7 +7,7 @@
             <v-flex xs12 sm6 pa-1>
               <v-select
                 label="Region"
-                v-bind:items="regions"
+                v-bind:items="regionOption"
                 v-model="$store.state.region.selected"
                 multiple
                 autocomplete
@@ -17,7 +17,7 @@
             <v-flex xs12 sm6 pa-1>
               <v-select
                 label="Category"
-                v-bind:items="categories"
+                v-bind:items="categoryOption"
                 v-model="$store.state.category.selected"
                 multiple
                 autocomplete
@@ -27,7 +27,7 @@
             <v-flex xs12 sm12 pa-1>
               <v-select
                 label="Instrumente"
-                v-bind:items="instruments"
+                v-bind:items="instrumentOption"
                 v-model="$store.state.instrument.selected"
                 multiple
                 autocomplete
@@ -58,15 +58,29 @@
       return {}
     },
     computed: {
-      instruments() {
-        return this.$store.getters.allInstruments.map(o => { return { text: o.name, value: o.id } })
+      instrumentOption() {
+        return this.$store.getters.instrumentAll.map(o => { return { text: o.institution + ': ' + o.instrument, value: o.id } })
       },
-      categories() {
-        return this.$store.getters.availableCategories.map(o => { return { text: o.name, value: o.id } })
+      categoryOption() {
+        return this.$store.getters.categoryAll.map(o => { return { text: o.en, value: o.id } })
       },
-      regions() {
-        return this.$store.getters.availableRegions.map(o => { return { text: o.name, value: o.id } })
+      regionOption() {
+        return this.$store.getters.regionAll.map(o => { return { text: o.en, value: o.id } })
       }
+    },
+    mounted() {
+      const loadPhaseTable = this.$store.dispatch('loadPhaseTable')
+      const loadCategoryTable = this.$store.dispatch('loadCategoryTable')
+      const loadRegionTable = this.$store.dispatch('loadRegionTable')
+
+      Promise.all([ loadPhaseTable, loadCategoryTable, loadRegionTable ]).then(() => {
+        this.$store.dispatch('loadInstrumentTable').catch((err) => {
+          console.error(err)
+        })
+      }, (err) => {
+        console.error(err)
+      })
+
     }
   }
 </script>
