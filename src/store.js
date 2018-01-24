@@ -13,8 +13,8 @@ export const store = new Vuex.Store({
       terms: {}
     },
     chart: {
-      width: null,
-      height: null,
+      width: 0,
+      height: 0,
       zoom: 1,
       axisSpace: 60,
       units: [
@@ -24,11 +24,11 @@ export const store = new Vuex.Store({
         { label: 'billion', start: 9 }
       ]
     },
-    instrument: { list: [], selected: [], data: {} },
-    region: { list: [], selected: [], data: {} },
-    category: { list: [], selected: [], data: {} },
-    phase: { list: [], data: {} },
-    cacheDuration: 0 //(1000*60*60*24*3) // 3 days
+    instrument: { list: [], data: {}, selected: [], available: [] },
+    region: { list: [], data: {}, selected: [], available: [] },
+    category: { list: [], data: {}, selected: [], available: [] },
+    phase: { list: [], data: {}, selected: [], available: [] },
+    cacheDuration: 0 //(1000*60*60*24*3) // 3 days,
   },
   mutations: {
     setChartZoom({ chart }, data) {
@@ -100,20 +100,23 @@ export const store = new Vuex.Store({
       const instruments = getters.instrumentAll.filter(v => {
         const cI = (selectedInstruments.indexOf(v.id) !== -1 || selectedInstruments.length === 0)
         const cR = (selectedRegions.indexOf(v.regionId) !== -1 || selectedRegions.length === 0)
-        const cC = (selectedCategories.indexOf(v.categoryId) !== -1 || selectedCategories.length === 0)
+        const cC = (intersect(selectedCategories, v.categoryIds).length !== 0 || selectedCategories.length === 0)
 
         if(cI && cR && cC) {
           return true
         }
       })
 
+
       store.commit('setChartZoom', { zoom: 1 })
 
-      return instruments
+      const sortedInstruments = instruments.sort((a,b) => { return a.layer - b.layer })
+
+      return sortedInstruments
     },
 
     xAxis(state, getters) {
-      const instruments = getters.availableInstruments
+      const instruments = getters.instrumentAvailable
       let minFrom = Infinity
       let maxTo = 0
       instruments.forEach(v => {
@@ -127,11 +130,20 @@ export const store = new Vuex.Store({
       }
     },
     yAxisMax(state, getters) {
-      const instruments = getters.availableInstruments
+      const instruments = getters.instrumentAvailable
+      const categorySelected = state.category.selected
       const zoom = state.chart.zoom
       let maxAmount = 0
       instruments.forEach(v => {
-        if(v.budget.t > maxAmount) maxAmount = v.budget.t
+        if(categorySelected.length === 0) {
+          if(v.budget.total > maxAmount) maxAmount = v.budget.total
+        } else {
+          v.budget.items.forEach(b => {
+            if(intersect(b.categoryIds, categorySelected).length !== 0){
+              if(b.amount > maxAmount) maxAmount = b.amount
+            }
+          })
+        }
       })
       return Math.round(maxAmount*zoom)
     },
@@ -180,12 +192,12 @@ export const store = new Vuex.Store({
           if(data) {
             const preparedData = data.map(v => {
               return {
-                id: v.id,
-                short: v.short,
-                en: v.en,
-                de: v.de,
-                fr: v.fr,
-                it: v.it
+                id: parseInt(v.id),
+                short: v.short ? v.short.trim() : '',
+                en: v.en ? v.en.trim() : '',
+                de: v.de ? v.de.trim() : '',
+                fr: v.fr ? v.fr.trim() : '',
+                it: v.it ? v.it.trim() : ''
               }
             })
             commit('initTable', { table: 'region', data: preparedData })
@@ -203,11 +215,13 @@ export const store = new Vuex.Store({
           if(data) {
             const preparedData = data.map(v => {
               return {
-                id: v.id,
-                en: v.en,
-                de: v.de,
-                fr: v.fr,
-                it: v.it
+                id: parseInt(v.id),
+                total: (v.total == 'true'),
+                color: v.color ? v.color.trim() : '',
+                en: v.en ? v.en.trim() : '',
+                de: v.de ? v.de.trim() : '',
+                fr: v.fr ? v.fr.trim() : '',
+                it: v.it ? v.it.trim() : ''
               }
             })
             commit('initTable', { table: 'category', data: preparedData })
@@ -225,11 +239,11 @@ export const store = new Vuex.Store({
           if(data) {
             const preparedData = data.map(v => {
               return {
-                id: v.id,
-                en: v.en,
-                de: v.de,
-                fr: v.fr,
-                it: v.it
+                id: parseInt(v.id),
+                en: v.en ? v.en.trim() : '',
+                de: v.de ? v.de.trim() : '',
+                fr: v.fr ? v.fr.trim() : '',
+                it: v.it ? v.it.trim() : ''
               }
             })
             commit('initTable', { table: 'phase', data: preparedData })
@@ -254,7 +268,11 @@ export const store = new Vuex.Store({
               categories.forEach(c => {
                 if(v[c.en]) {
                   if(v[c.en] > 0) {
-                    items.push({ categoryIds: [c.id], amount: v[c.en] })
+                    if(c.total) {
+                      items.push({ categoryIds: [c.id], amount: parseInt(v.total) })
+                    } else {
+                      items.push({ categoryIds: [c.id], amount: parseInt(v[c.en]) })
+                    }
                     if(!checkCategoryIds[c.id]){
                       categoryIds.push(c.id)
                       checkCategoryIds[c.id] = true
@@ -274,20 +292,21 @@ export const store = new Vuex.Store({
                       }
                     }
                   })
-                  items.push({ categoryIds: ids, amount: v.environment_energy })
+                  items.push({ categoryIds: ids, amount: parseInt(v.environment_energy) })
                 }
               }
 
               return {
-                id: v.id,
-                institution: v.institution,
-                instrument: v.instrument,
-                regionId: v.regionId,
+                id: parseInt(v.id),
+                institution: v.institution ? v.institution.trim() : '',
+                instrument: v.instrument ? v.instrument.trim() : '',
+                regionId: parseInt(v.regionId),
                 categoryIds: categoryIds,
-                from: v.from,
-                to: v.to,
+                from: parseFloat(v.from),
+                to: parseFloat(v.to),
+                layer: parseFloat(v.layer),
                 budget: {
-                  total: v.total,
+                  total: parseInt(v.total),
                   items: items
                 }
               }
