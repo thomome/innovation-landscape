@@ -1,15 +1,13 @@
 <template>
   <div class="chart-container">
-    <svg width="100%" height="500px" ref="chart">
-      <ilv-chart-y-axis direction="y"></ilv-chart-y-axis>
-      <g class="bars">
-        <transition-group tag="g" name="bars">
+    <svg width="100%" height="500px" ref="chart" :viewBox="viewBox">
+      <ilv-chart-y-axis></ilv-chart-y-axis>
+      <g class="data">
+        <transition-group tag="g" name="grow">
           <ilv-chart-bar
-            v-for="inst in instruments"
-            :key="'instrument-' + inst.id"
-            :from="inst.from"
-            :to="inst.to"
-            :amount="inst.amount"
+            v-for="instrument in instrumentAvailable"
+            :key="'instrument-' + instrument.id"
+            :instrument="instrument"
           ></ilv-chart-bar>
         </transition-group>
       </g>
@@ -18,6 +16,7 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
   import ilvChartBar from './ilv-chart-bar.vue'
   import ilvChartYAxis from './ilv-chart-y-axis.vue'
 
@@ -30,17 +29,18 @@
       ilvChartBar, ilvChartYAxis
     },
     computed: {
-      instruments() {
-        return this.$store.getters.availableInstruments;
+      ...mapGetters([ 'instrumentAvailable' ]),
+      viewBox() {
+        const chart = this.$store.state.chart
+        return `0 0 ${chart.width} ${chart.height}`
       }
     },
     methods: {
       updateSize() {
         this.$store.commit('setChartDimension', {
-          width: this.$refs.chart.clientWidth,
-          height: this.$refs.chart.clientHeight
+          width: this.$refs.chart.clientWidth || this.$refs.chart.parentNode.clientWidth,
+          height: this.$refs.chart.clientHeight || this.$refs.chart.parentNode.clientHeight
         })
-
       }
     },
     mounted: function () {
@@ -66,6 +66,7 @@
     width: 100%;
     height: 0;
     padding-bottom: 66.66%;
+    overflow: hidden;
 
     svg {
       position: absolute;
@@ -76,11 +77,11 @@
     }
   }
 
-  .bars-enter-active, .bars-leave-active {
+  .grow-enter-active, .grow-leave-active {
     transition: transform .3s;
     transform-origin: center bottom;
   }
-  .bars-enter, .bars-leave-to {
+  .grow-enter, .grow-leave-to {
     transform: scaleY(0);
   }
 </style>
