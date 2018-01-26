@@ -44,6 +44,7 @@
   .fade-enter-active, .fade-leave-active {
     transition: transform .5s;
     transform-origin: center bottom;
+    transform-box: fill-box;
   }
   .fade-enter, .fade-leave-to {
     transform: scale(1, 0)

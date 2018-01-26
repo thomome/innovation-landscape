@@ -120,7 +120,7 @@
         const vm = this
         const lastVal = vm.max;
         this.animation = function () {
-          vm.max = vm.max + ((newVal - vm.max) * 0.1)
+          vm.max = vm.max + ((newVal - vm.max) * 0.2)
 
           if(Math.round(500/newVal * vm.max ) !== 500) {
             requestAnimationFrame(vm.animation)
@@ -172,6 +172,7 @@
   .fade2-enter-active, .fade2-leave-active {
     transition: transform .5s;
     transform-origin: center bottom;
+    transform-box: fill-box;
   }
   .fade2-enter, .fade2-leave-to {
     transform: scale(1, 0)
