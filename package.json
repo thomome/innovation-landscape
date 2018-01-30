@@ -9,7 +9,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
-    "@tweenjs/tween.js": "^17.1.1",
+    "bezier-easing": "^2.0.3",
     "color": "^2.0.1",
     "papaparse": "^4.3.6",
     "vue": "^2.5.13",
