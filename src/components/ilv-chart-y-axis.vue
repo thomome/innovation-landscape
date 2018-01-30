@@ -6,7 +6,7 @@
     <g class="label" v-for="tic in tics" :key="tic.id" :transform="`translate(${tic.x}, ${tic.y})`">
       <path class="tic" d="M0,1 L-10,1"></path>
       <path class="grid" d="M0,1 L1500,1"></path>
-      <text class="text" x="-2" y="6" text-anchor="end" alignment-baseline="hanging">
+      <text class="text" x="-2" y="6" text-anchor="end" dominant-baseline="hanging">
         {{ tic.number }}
       </text>
     </g>
