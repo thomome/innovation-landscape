@@ -1,5 +1,5 @@
 <template>
-  <div class="chart-container">
+  <div class="chart-container" ref="chart">
     <svg width="100%" height="500px" ref="chart" :viewBox="viewBox">
       <ilv-chart-y-axis
         :chart="chart"
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-  import TWEEN from '@tweenjs/tween.js'
+  import BezierEasing from 'bezier-easing'
   import { intersect } from './../util.js'
   import { mapGetters } from 'vuex'
   import ilvChartBar from './ilv-chart-bar.vue'
@@ -34,7 +34,7 @@
           width: 0,
           height: 0
         },
-        max: 0,
+        max: 1,
         spacing: 60,
         units: [
           { label: '', start: 0 },
@@ -43,6 +43,8 @@
           { label: 'billion', start: 9 },
           { label: 'trillion', start: 12 }
         ],
+        easing: BezierEasing(0,0,.58,1),
+        duration: 600,
         animation: null
       }
     },
@@ -56,21 +58,21 @@
       },
       maxFromRaw() {
         const instruments = this.instrumentAvailable
-        const categorySelected = this.$store.state.category.selected
+        const typeSelected = this.$store.state.type.selected
         let maxAmount = 0
         instruments.forEach(v => {
-          if(categorySelected.length === 0) {
-            if(v.budget.total > maxAmount) maxAmount = v.budget.total
-          } else {
-            v.budget.items.forEach(b => {
-              if(intersect(b.categoryIds, categorySelected).length !== 0){
-                if(b.amount > maxAmount) maxAmount = b.amount
-              }
-            })
-          }
+          v.budget.forEach(b => {
+            if(intersect(b.typeIds, typeSelected).length !== 0){
+              if(b.amount > maxAmount) maxAmount = b.amount
+            }
+          })
         })
         this.zoom = 1
-        return maxAmount
+        if(maxAmount === 0) {
+          maxAmount = 10000000
+          this.max = 10000000
+        }
+        return maxAmount*1.5
       },
       maxWithZoom() {
         return this.maxFromRaw*this.zoom
@@ -92,37 +94,23 @@
           spacing: this.spacing,
           max: parseInt(this.max),
           absoluteMax: parseInt(this.maxFromRaw),
+          yScale: (this.size.height-this.spacing)/this.max,
+          xScale: 1/this.$store.state.phase.list.length,
           unit: this.unit
         }
       }
     },
     watch: {
-      /*maxWithZoom: function(newVal, oldVal) {
-        var vm = this
-        function animate () {
-          if (TWEEN.update()) {
-            requestAnimationFrame(animate)
-          }
-        }
-
-        new TWEEN.Tween({ tweeningNumber: oldVal })
-          .easing(TWEEN.Easing.Cubic.InOut)
-          .interpolation(TWEEN.Interpolation.Bezier)
-          .to({ tweeningNumber: newVal }, 400)
-          .onUpdate(function ({tweeningNumber}) {
-            vm.max = tweeningNumber.toFixed(0)
-          })
-          .start()
-
-        animate()
-      },*/
       maxWithZoom: function(newVal) {
+        const start = Date.now()
         const vm = this
         const lastVal = vm.max;
         this.animation = function () {
-          vm.max = vm.max + ((newVal - vm.max) * 0.2)
+          const progress = 1/vm.duration*(Date.now() - start)
+          const ease = vm.easing(progress)
+          vm.max = lastVal + ((newVal - lastVal) * ease)
 
-          if(Math.round(500/newVal * vm.max ) !== 500) {
+          if(progress < 1) {
             requestAnimationFrame(vm.animation)
           } else {
             vm.max = newVal
@@ -141,7 +129,7 @@
     mounted: function () {
       this.updateSize()
       window.addEventListener('resize', this.updateSize)
-      document.body.addEventListener('wheel', (e) => {
+      this.$refs.chart.addEventListener('wheel', (e) => {
         const mult = e.deltaY < 0 ? -1 : 1
         this.zoom += (this.zoom*0.1*mult)
       })
