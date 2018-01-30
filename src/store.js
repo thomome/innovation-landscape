@@ -16,6 +16,7 @@ export const store = new Vuex.Store({
     region: { list: [], data: {}, selected: [], available: [] },
     category: { list: [], data: {}, selected: [], available: [] },
     phase: { list: [], data: {}, selected: [], available: [] },
+    type: { list: [], data: {}, selected: [], available: [] },
     cacheDuration: 0 //(1000*60*60*24*3) // 3 days,
   },
   mutations: {
@@ -41,6 +42,9 @@ export const store = new Vuex.Store({
     regionAll({ region }) {
       return region.list.map(id => region.data[id])
     },
+    typeAll({ type }) {
+      return type.list.map(id => type.data[id])
+    },
     instrumentAll({ instrument }) {
       return instrument.list.map(id => instrument.data[id])
     },
@@ -53,6 +57,9 @@ export const store = new Vuex.Store({
     },
     regionSelected({ region }) {
       return region.selected.map(id => region.data[id])
+    },
+    typeSelected({ type }) {
+      return type.selected.map(id => type.data[id])
     },
     instrumentSelected({ instrument }) {
       return instrument.selected.map(id => instrument.data[id])
@@ -67,8 +74,8 @@ export const store = new Vuex.Store({
     regionAvailable({ region }) {
       return region.available.map(id => region.data[id])
     },
-    instrumentAvailable({ instrument }) {
-      return instrument.available.map(id => instrument.data[id])
+    typeAvailable({ type }) {
+      return type.available.map(id => type.data[id])
     },
     instrumentAvailable(state, getters) {
       const selectedRegions = state.region.selected
@@ -86,6 +93,21 @@ export const store = new Vuex.Store({
       })
 
       const sortedInstruments = instruments.sort((a,b) => { return a.layer - b.layer })
+
+      const instsPerCategory = {}
+      sortedInstruments.some((v, i) => {
+        const id = v.categoryIds.join(',')
+        if(instsPerCategory[id]){
+          instsPerCategory[id]++
+        } else {
+          instsPerCategory[id] = 1
+        }
+        sortedInstruments[i].shade = instsPerCategory[id]
+      })
+      sortedInstruments.some((v, i) => {
+        const id = v.categoryIds.join(',')
+        sortedInstruments[i].shade = 1 - (1/instsPerCategory[id]*v.shade)
+      })
 
       return sortedInstruments
     },
@@ -175,46 +197,56 @@ export const store = new Vuex.Store({
         })
       })
     },
+    loadTypeTable({ commit, state, dispatch }) {
+      return new Promise(( resolve, reject ) => {
+        dispatch('loadTable', { table: 'type' }).then(data => {
+          if(data) {
+            const preparedData = data.map(v => {
+              return {
+                id: parseInt(v.id),
+                en: v.en ? v.en.trim() : '',
+                de: v.de ? v.de.trim() : '',
+                fr: v.fr ? v.fr.trim() : '',
+                it: v.it ? v.it.trim() : ''
+              }
+            })
+            commit('initTable', { table: 'type', data: preparedData })
+            dispatch('saveTable', { table: 'type', data: preparedData })
+            resolve()
+          }
+        }, err => {
+          reject(err)
+        })
+      })
+    },
     loadInstrumentTable({ commit, state, dispatch, getters }) {
       return new Promise((resolve, reject) => {
         dispatch('loadTable', { table: 'instrument' }).then(data => {
           if(data) {
             const preparedData = data.map(v => {
-              const categories = getters.categoryAll
+              const allTypes = getters.typeAll
               const items = []
-              const categoryIds = []
-              const checkCategoryIds = {}
+              const categoryIds = v.categoryIds.split(',').map(id => parseInt(id))
 
-              categories.forEach(c => {
-                if(v[c.en]) {
-                  if(v[c.en] > 0) {
-                    if(c.total) {
-                      items.push({ categoryIds: [c.id], amount: parseInt(v.total) })
-                    } else {
-                      items.push({ categoryIds: [c.id], amount: parseInt(v[c.en]) })
-                    }
-                    if(!checkCategoryIds[c.id]){
-                      categoryIds.push(c.id)
-                      checkCategoryIds[c.id] = true
-                    }
-                  }
-                }
-              })
-              if(v.environment_energy) {
-                if(v.environment_energy > 0) {
-                  const ids = []
-                  categories.forEach(c => {
-                    if(c.en === 'energy' || c.en === 'environment') {
-                      ids.push(c.id)
-                      if(!checkCategoryIds[c.id]){
-                        categoryIds.push(c.id)
-                        checkCategoryIds[c.id] = true
-                      }
+              Object.keys(v).forEach((k, i) => {
+
+                const budgets = k.split(';')
+                const types = []
+
+                budgets.forEach(b => {
+                  allTypes.forEach(t => {
+                    if(b === t.en && parseInt(v[k]) !== 0) {
+                      types.push(t.id)
                     }
                   })
-                  items.push({ categoryIds: ids, amount: parseInt(v.environment_energy) })
+                })
+                if(types.length > 0) {
+                  items.push({
+                    typeIds: types,
+                    amount: parseInt(v[k])
+                  })
                 }
-              }
+              })
 
               return {
                 id: parseInt(v.id),
@@ -225,12 +257,11 @@ export const store = new Vuex.Store({
                 from: parseFloat(v.from),
                 to: parseFloat(v.to),
                 layer: parseFloat(v.layer),
-                budget: {
-                  total: parseInt(v.total),
-                  items: items
-                }
+                website: v.website ? v.website.trim() : '',
+                budget: items
               }
             })
+
             commit('initTable', { table: 'instrument', data: preparedData })
             dispatch('saveTable', { table: 'instrument', data: preparedData })
             resolve()
