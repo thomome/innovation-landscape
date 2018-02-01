@@ -180,6 +180,32 @@ function accentFold(inStr) {
   });
 }
 
+function formatAmount(number, unit = 0, places = 0, prefix = '', suffix = '') {
+  number = number * Math.pow(10, unit*-1)
+  let placeNumber = Math.round((number % 1) * Math.pow(10, places))
+  const numberString = Math.floor(number).toString()
+  placeNumber = placeNumber.toString()
+  for(let i = 0; i < places; i++) {
+    placeNumber += '0'
+  }
+  placeNumber = placeNumber.slice(0, places)
+
+  let numberArray = []
+  const l = numberString.length
+  for(var i = l; i >= 0; i = i - 3){
+    const from = i-3 > 0 ? i-3 : 0
+    const to = i > 0 ? i : 0
+    numberArray.push(numberString.slice(from, to))
+  }
+  numberArray.reverse()
+  numberArray = numberArray.filter((v) => { return v !== ''})
+  if(places) {
+    return prefix+numberArray.join("'")+"."+placeNumber+suffix
+  } else {
+    return prefix+numberArray.join("'")+suffix
+  }
+}
+
 
 export {
   saveAs,
@@ -190,5 +216,6 @@ export {
   ajax,
   extend,
   accentFold,
-  roundNumber
+  roundNumber,
+  formatAmount
 }
