@@ -4,6 +4,9 @@
       <ilv-chart-y-axis
         :chart="chart"
       ></ilv-chart-y-axis>
+      <ilv-chart-x-axis
+        :chart="chart"
+      ></ilv-chart-x-axis>
       <g class="data">
         <transition-group name="fade2" tag="g">
           <ilv-chart-bar
@@ -24,6 +27,7 @@
   import { mapGetters } from 'vuex'
   import ilvChartBar from './ilv-chart-bar.vue'
   import ilvChartYAxis from './ilv-chart-y-axis.vue'
+  import ilvChartXAxis from './ilv-chart-x-axis.vue'
 
 
   export default {
@@ -49,7 +53,7 @@
       }
     },
     components: {
-      ilvChartBar, ilvChartYAxis
+      ilvChartBar, ilvChartYAxis, ilvChartXAxis
     },
     computed: {
       ...mapGetters([ 'instrumentAvailable' ]),
@@ -58,7 +62,7 @@
       },
       maxFromRaw() {
         const instruments = this.instrumentAvailable
-        const typeSelected = this.$store.state.type.selected
+        const typeSelected = this.$store.getters.typeSelected
         let maxAmount = 0
         instruments.forEach(v => {
           v.budget.forEach(b => {
@@ -145,7 +149,7 @@
     position: relative;
     width: 100%;
     height: 0;
-    padding-bottom: 66.66%;
+    padding-bottom: 75%;
     overflow: hidden;
 
     svg {
