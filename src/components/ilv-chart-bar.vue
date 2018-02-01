@@ -1,8 +1,8 @@
 <template>
   <g>
-    <text v-if="labelPos" x="0" y="0" :transform="`translate(${labelPos.x}, ${labelPos.y}) rotate(-60)`">
-      <tspan x="0" dy="1.2em">{{ instrument.institution }}</tspan>
-      <tspan x="0" dy="1.2em" style="font-weight: bold">{{ instrument.instrument }}</tspan>
+    <text v-if="labelPos" x="0" y="0" class="bar-label" :transform="`translate(${labelPos.x}, ${labelPos.y}) rotate(-60)`">
+      <tspan x="0" dy="1.2em" style="font-weight: bold">{{ instrument.institution }} {{ instrument.instrument }}</tspan>
+      <tspan x="0" dy="1.2em" style="">{{ formatAmount(instrument.budget[0].amount, 6, 0, 'Fr. ', ' Mio.') }}</tspan>
     </text>
     <g @click="openWebsite" @mouseenter="openTooltip" @mouseleave="closeTooltip" class="bar">
       <defs v-if="pattern">
@@ -45,7 +45,7 @@
 
 <script>
   import Color from 'color'
-  import { intersect } from './../util.js'
+  import { intersect, formatAmount } from './../util.js'
   import ilvChartBarPeak from './ilv-chart-bar-peak.vue'
 
   export default {
@@ -74,7 +74,7 @@
         }
       },
       budgetItems() {
-        const typeSelected = this.$store.state.type.selected
+        const typeSelected = this.$store.getters.typeSelected
         const filteredBudgetItems = this.instrument.budget.filter(v => {
           return intersect(typeSelected, v.typeIds).length !== 0
         })
@@ -120,6 +120,7 @@
       },
     },
     methods: {
+      formatAmount: formatAmount,
       openTooltip() {
         this.eventHub.$emit('tooltip-enter', this.instrument.id)
       },
@@ -134,6 +135,9 @@
 </script>
 
 <style lang="scss" scoped>
+  .bar-label {
+    font-size: 1rem;
+  }
   .bar {
     opacity: 0.95;
     shape-rendering: auto;
@@ -141,6 +145,10 @@
 
     &:hover {
       opacity: 1;
+
+      .main {
+        stroke: rgba(0,0,0,0.6);
+      }
     }
   }
   .fill-pattern rect {
