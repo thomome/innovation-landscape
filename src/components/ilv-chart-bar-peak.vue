@@ -1,5 +1,5 @@
 <template>
-  <path :d="path" :fill="fill" :class="[!main ? 'outline' : '']"></path>
+  <path :d="path" :fill="fill" :class="[!main ? 'outline' : 'main']"></path>
 </template>
 
 <script>
@@ -45,6 +45,9 @@
 
 <style lang="scss" scoped>
   path {
+    transition: stroke 0.2s;
+    stroke: rgba(0,0,0,0);
+    stroke-width: 1;
 
     &.outline {
       opacity: 0.2;
