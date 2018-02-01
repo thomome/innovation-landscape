@@ -59,7 +59,7 @@ export const store = new Vuex.Store({
       return region.selected.map(id => region.data[id])
     },
     typeSelected({ type }) {
-      return type.selected.map(id => type.data[id])
+      return type.selected.length > 0 ? type.selected : [type.list[0]]
     },
     instrumentSelected({ instrument }) {
       return instrument.selected.map(id => instrument.data[id])
@@ -207,7 +207,8 @@ export const store = new Vuex.Store({
                 en: v.en ? v.en.trim() : '',
                 de: v.de ? v.de.trim() : '',
                 fr: v.fr ? v.fr.trim() : '',
-                it: v.it ? v.it.trim() : ''
+                it: v.it ? v.it.trim() : '',
+                color: v.color ? v.color.trim() : ''
               }
             })
             commit('initTable', { table: 'type', data: preparedData })
@@ -258,7 +259,8 @@ export const store = new Vuex.Store({
                 to: parseFloat(v.to),
                 layer: parseFloat(v.layer),
                 website: v.website ? v.website.trim() : '',
-                budget: items
+                budget: items,
+                source: v.source ? v.source.trim() : ''
               }
             })
 
