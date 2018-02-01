@@ -1,5 +1,5 @@
 <template>
-  <g class="axis">
+  <g class="y-axis">
     <text class="legend" x="0" y="0" :transform="legendTransform">
       {{ legendText }}
     </text>
@@ -80,7 +80,7 @@
     font-size: 1.15rem;
   }
   .label {
-
+    font-size: 0.93rem;
     .tic {
       stroke: #000;
     }
