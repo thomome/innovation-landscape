@@ -105,3 +105,9 @@
     }
   }
 </script>
+<style lang="scss">
+  #app {
+    max-width: 848px;
+    margin: auto;
+  }
+</style>
