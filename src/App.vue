@@ -1,66 +1,68 @@
 <template>
-  <v-app>
-    <v-content>
-      <v-card flat tile>
-        <v-container fluid pa-0>
-          <v-layout row wrap>
-            <v-flex xs12 pa-0>
-              <ilv-chart></ilv-chart>
-            </v-flex>
-          </v-layout>
-          <v-layout row wrap justify-end>
-            <v-flex xs12 sm6 pa-1>
-              <v-select
-                label="Region"
-                v-bind:items="regionOption"
-                v-model="$store.state.region.selected"
-                multiple
-                autocomplete
-                clearable
-                dense
-              ></v-select>
-            </v-flex>
-            <v-flex xs12 sm6 pa-1>
-              <v-select
-                label="Category"
-                v-bind:items="categoryOption"
-                v-model="$store.state.category.selected"
-                multiple
-                autocomplete
-                clearable
-                dense
-              ></v-select>
-            </v-flex>
-            <v-flex xs12 sm6 pa-1>
-              <v-select
-                label="Instrumente"
-                v-bind:items="instrumentOption"
-                v-model="$store.state.instrument.selected"
-                multiple
-                autocomplete
-                clearable
-                dense
-              ></v-select>
-            </v-flex>
-            <v-flex xs12 sm6 pa-1>
-              <v-select
-                label="Budget"
-                v-bind:items="typeOption"
-                v-model="$store.state.type.selected"
-                multiple
-                autocomplete
-                clearable
-                dense
-              ></v-select>
-            </v-flex>
+  <div>
+    <v-app>
+      <v-content>
+        <v-card flat tile>
+          <v-container fluid pa-0>
+            <v-layout row wrap>
+              <v-flex xs12 pa-0>
+                <ilv-chart></ilv-chart>
+              </v-flex>
+            </v-layout>
+            <v-layout row wrap justify-end>
+              <v-flex xs12 sm6 pa-1>
+                <v-select
+                  label="Region"
+                  v-bind:items="regionOption"
+                  v-model="$store.state.region.selected"
+                  multiple
+                  autocomplete
+                  clearable
+                  dense
+                ></v-select>
+              </v-flex>
+              <v-flex xs12 sm6 pa-1>
+                <v-select
+                  label="Category"
+                  v-bind:items="categoryOption"
+                  v-model="$store.state.category.selected"
+                  multiple
+                  autocomplete
+                  clearable
+                  dense
+                ></v-select>
+              </v-flex>
+              <v-flex xs12 sm6 pa-1>
+                <v-select
+                  label="Instrumente"
+                  v-bind:items="instrumentOption"
+                  v-model="$store.state.instrument.selected"
+                  multiple
+                  autocomplete
+                  clearable
+                  dense
+                ></v-select>
+              </v-flex>
+              <v-flex xs12 sm6 pa-1>
+                <v-select
+                  label="Budget"
+                  v-bind:items="typeOption"
+                  v-model="$store.state.type.selected"
+                  multiple
+                  autocomplete
+                  clearable
+                  dense
+                ></v-select>
+              </v-flex>
 
-          </v-layout>
+            </v-layout>
 
-        </v-container>
-      </v-card>
-    </v-content>
+          </v-container>
+        </v-card>
+      </v-content>
+    </v-app>
     <ilv-tooltip></ilv-tooltip>
-  </v-app>
+  </div>
 </template>
 
 <script>
