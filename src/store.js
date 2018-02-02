@@ -96,7 +96,7 @@ export const store = new Vuex.Store({
 
       const instsPerCategory = {}
       sortedInstruments.some((v, i) => {
-        const id = v.categoryIds.join(',')
+        const id = v.categoryIds.length < 2 ? v.categoryIds[0] : 'mixed'
         if(instsPerCategory[id]){
           instsPerCategory[id]++
         } else {
@@ -105,7 +105,8 @@ export const store = new Vuex.Store({
         sortedInstruments[i].shade = instsPerCategory[id]
       })
       sortedInstruments.some((v, i) => {
-        const id = v.categoryIds.join(',')
+        const id = v.categoryIds.length < 2 ? v.categoryIds[0] : 'mixed'
+        sortedInstruments[i].angle = (v.shade % 2)*2-1
         sortedInstruments[i].shade = 1 - (1/instsPerCategory[id]*v.shade)
       })
 
@@ -233,6 +234,7 @@ export const store = new Vuex.Store({
 
                 const budgets = k.split(';')
                 const types = []
+                const source = v[budgets.join('_')+'_source']
 
                 budgets.forEach(b => {
                   allTypes.forEach(t => {
@@ -244,7 +246,8 @@ export const store = new Vuex.Store({
                 if(types.length > 0) {
                   items.push({
                     typeIds: types,
-                    amount: parseInt(v[k])
+                    amount: parseInt(v[k]),
+                    source: source
                   })
                 }
               })
@@ -259,8 +262,7 @@ export const store = new Vuex.Store({
                 to: parseFloat(v.to),
                 layer: parseFloat(v.layer),
                 website: v.website ? v.website.trim() : '',
-                budget: items,
-                source: v.source ? v.source.trim() : ''
+                budget: items
               }
             })
 
