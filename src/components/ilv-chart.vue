@@ -33,6 +33,7 @@
   export default {
     data() {
       return {
+        activeId: null,
         zoom: 1,
         size: {
           width: 0,
@@ -79,7 +80,10 @@
         return maxAmount*1.5
       },
       maxWithZoom() {
-        return this.maxFromRaw*this.zoom
+        let max = this.maxFromRaw*this.zoom
+        if(max < 100) max = 100
+        if(max > 1000000000000) max = 1000000000000
+        return max
       },
       unit() {
         let unit = {}
@@ -136,6 +140,13 @@
       this.$refs.chart.addEventListener('wheel', (e) => {
         const mult = e.deltaY < 0 ? -1 : 1
         this.zoom += (this.zoom*0.1*mult)
+      })
+
+      this.eventHub.$on('tooltip-enter', id => {
+        this.activeId = id
+      })
+      this.eventHub.$on('tooltip-leave', () => {
+        this.activeId = null
       })
     },
     beforeDestroy: function () {
