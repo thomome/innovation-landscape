@@ -46,12 +46,13 @@
 <style lang="scss" scoped>
   path {
     transition: stroke 0.2s;
-    stroke: rgba(0,0,0,0);
+    stroke: rgba(0,0,0,0.4);
     stroke-width: 1;
 
     &.outline {
-      opacity: 0.2;
-      stroke: #000;
+      opacity: 0.8;
+      stroke: rgba(0,0,0,1);
+      fill: rgba(0,0,0,0);
       //stroke-dasharray: 3px 3px;
     }
   }
