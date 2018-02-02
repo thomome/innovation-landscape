@@ -15,7 +15,7 @@
         <div v-for="budget in budgetItems" :key="`${instrument.id}-${budget.typeIds.join(',')}`">
           <div class="tooltip-budget-bar">
             <div class="tooltip-budget-bar-fill" :style="{
-              transform: `scaleX(${1/budgetItems[0].amount*budget.amount})`,
+              width: `${100/budgetItems[0].amount*budget.amount}%`,
               background: budget.background
             }"></div>
           </div>
@@ -23,11 +23,15 @@
             <span class="tooltip-budget-name">
               Budget | <strong>{{ budget.typeString }}</strong>
             </span>
-            <span class="tooltip-budget-amount">{{ formatAmount(budget.amount) }} Fr.</span>
+            <span class="tooltip-budget-amount">
+              {{ formatAmount(budget.amount) }} Fr.<sup>{{ budget.sourceIndex }}</sup>
+            </span>
           </div>
         </div>
         <div class="tooltip-data-source">
-          {{ instrument.source }}
+          <div v-for="budget in sourceItems" v-if="budget.source" :key="`${instrument.id}-${budget.typeIds.join(',')}-source`" class="tooltip-data-source-item">
+            <span class="source-number">{{ budget.sourceIndex }}</span> <span class="source-text">{{ budget.source }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -53,11 +57,45 @@ export default {
     instrument() {
       return this.$store.state.instrument.data[this.instrumentId]
     },
-    budgetItems() {
-      let budgetItems = this.instrument.budget.filter((v) => {
+    budgetItemsSorted() {
+      const budgetItems = this.instrument.budget.map(v => v)
+      budgetItems.sort((a, b) => {
+        return a.amount == b.amount ? a.typeIds[0] - b.typeIds[0] : b.amount - a.amount
+      })
+      let sourceIndex = 0
+      budgetItems.map(v => {
+        if(v.source) {
+          sourceIndex++
+          v.sourceIndex = sourceIndex
+        } else {
+          v.sourceIndex = 1
+        }
+        return v
+      })
+      return budgetItems
+    },
+    sourceItems() {
+      let withoutSource = 0
+      let totalAlreadyIn = false
+      const sourceItems = this.budgetItemsSorted.filter((v,i) => {
+        if(intersect(v.typeIds, this.$store.getters.typeSelected).length !== 0) {
+          if(!v.source) withoutSource++
+          if(i === 0) totalAlreadyIn = true
+          return true
+        }
+      })
+      if(withoutSource > 0 && !totalAlreadyIn) {
+        sourceItems.unshift(this.budgetItemsSorted[0])
+      }
+      return sourceItems
+    },
+    budgetItemsFiltered() {
+      return this.budgetItemsSorted.filter((v) => {
         return intersect(v.typeIds, this.$store.getters.typeSelected).length !== 0
       })
-      budgetItems = budgetItems.map((v) => {
+    },
+    budgetItems() {
+      const budgetItems = this.budgetItemsFiltered.map((v) => {
         const item = v
         item.typeString = v.typeIds.map(id => this.$store.state.type.data[id].en).join('/')
         if(v.typeIds.length === 1) {
@@ -70,14 +108,11 @@ export default {
             gradientArray.push(`${color} ${(index+1)*this.patternSize}px`)
           })
           const gradient = `repeating-linear-gradient(30deg, ${gradientArray.join(', ')})`
-          console.log(gradient)
           item.background = gradient
         }
         return item
       })
-      return budgetItems.sort((a, b) => {
-        return a.amount == b.amount ? a.typeIds[0] - b.typeIds[0] : b.amount - a.amount
-      })
+      return budgetItems
     },
     lead() {
       return this.$store.state.region.data[this.instrument.regionId].en + ' » ' + this.instrument.categoryIds.map(id => this.$store.state.category.data[id].en).join(', ')
@@ -90,9 +125,10 @@ export default {
     window.addEventListener('mousemove', (e) => {
       if(this.active) {
         if(this.$refs.tooltip) {
+          const appWidth = this.$root.$el.clientWidth
           const width = this.$refs.tooltip.clientWidth
-          if(e.pageX + width > document.body.clientWidth) {
-            this.offset.x = (e.pageX + width - document.body.clientWidth) * -1
+          if(e.pageX + width > appWidth) {
+            this.offset.x = (e.pageX + width - appWidth) * -1
           } else {
             this.offset.x = 0
           }
@@ -128,11 +164,14 @@ export default {
   }
 
   .tooltip-container {
+    z-index: 1000000;
     position: absolute;
+    left: 0;
+    top: 0;
     margin-left: 15px;
     margin-top: 30px;
     min-width: 300px;
-    max-width: 350px;
+    max-width: 400px;
 
     .tooltip {
       position: relative;
@@ -162,6 +201,10 @@ export default {
         .tooltip-budget-amount {
           font-weight: bold;
           margin-left: auto;
+
+          sup {
+            font-weight: normal;
+          }
         }
       }
       .tooltip-budget-bar {
@@ -172,24 +215,37 @@ export default {
         margin-bottom: 1px;
 
         .tooltip-budget-bar-fill {
-          width: 100%;
           background: #000;
-          height: 100%;
-          transform-origin: left top;
+          min-height: 100%;
         }
       }
       .tooltip-data-source {
+        position: relative;
         margin-top: 1.5rem;
+        padding-top: 3px;
+        font-size: 0.85rem;
+        font-style: italic;
+
         &::before {
           content: '';
+          left: 0;
+          top: 0;
+          position: absolute;
           display: block;
           width: 1.5rem;
           height: 1px;
           background: #000;
-          margin-bottom: 3px;
         }
-        font-size: 0.85rem;
-        font-style: italic;
+
+        .tooltip-data-source-item {
+          display: flex;
+          margin-top: 3px;
+
+          .source-number {
+            font-style: normal;
+            margin-right: 5px;
+          }
+        }
       }
     }
   }
