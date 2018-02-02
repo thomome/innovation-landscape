@@ -1,23 +1,26 @@
 <template>
   <g>
-    <text v-if="labelPos" x="0" y="0" class="bar-label" :transform="`translate(${labelPos.x}, ${labelPos.y}) rotate(-60)`">
-      <tspan x="0" dy="1.2em" style="font-weight: bold">{{ instrument.institution }} {{ instrument.instrument }}</tspan>
-      <tspan x="0" dy="1.2em" style="">{{ formatAmount(instrument.budget[0].amount, 6, 0, 'Fr. ', ' Mio.') }}</tspan>
-    </text>
     <g @click="openWebsite" @mouseenter="openTooltip" @mouseleave="closeTooltip" class="bar">
+      <text v-if="labelPos" x="0" y="0" class="bar-label" :transform="`translate(${labelPos.x}, ${labelPos.y}) rotate(${labelRot})`">
+        <tspan x="10" dy="1.2em" style="font-weight: bold">{{ instrument.institution }} {{ instrument.instrument }}</tspan>
+        <tspan x="10" dy="1.2em" style="">{{ formatAmount(instrument.budget[0].amount, 6, 0, 'Fr. ', ' Mio.') }}</tspan>
+      </text>
       <defs v-if="pattern">
         <pattern
           class="fill-pattern"
           :id="`instrument-${instrument.id}`"
           x="0"
           y="0"
-          :width="patternSize"
-          :height="patternSize"
+          :width="pattern.size"
+          :height="pattern.size"
           patternUnits="userSpaceOnUse"
         >
-          <g transform="rotate(45)">
+          <g :transform="`
+            rotate(${pattern.angle}, ${pattern.size*0.5}, ${pattern.size*0.5})
+            translate(${(pattern.diagonal-pattern.size)*-0.5},${(pattern.diagonal-pattern.size)*-0.5})
+          `">
             <rect
-              v-for="item in pattern"
+              v-for="item in pattern.items"
               x="0"
               :y="item.y"
               :width="item.w"
@@ -53,10 +56,15 @@
     props: ['instrument', 'instrumentIndex', 'chart'],
     data () {
       return {
-        patternSize: 15
+        patternStripeWidth: 7
       }
     },
     computed: {
+      labelRot() {
+        let rotation = ((this.$store.getters.instrumentAvailable.length-1) * 5) + 60
+        if(rotation > 90) rotation = 90
+        return rotation*-1
+      },
       labelPos() {
         if(this.budgetItems[0]){
           const chart = this.chart
@@ -67,7 +75,7 @@
           const y = chart.yScale === Infinity ? 0 : chart.size.height - chart.spacing - 10 - (this.budgetItems[0].amount*chart.yScale)
           return {
             x: x-10,
-            y: y-10
+            y: y
           }
         } else {
           return false
@@ -84,23 +92,32 @@
         const cats = this.$store.state.category.data
         const ids = this.instrument.categoryIds
         if(ids.length > 1) {
+          let index = 0
+          const patternSize = Math.sqrt(Math.pow(ids.length*this.patternStripeWidth*2,2)*0.5)
+          const patternDiagonal = ids.length*this.patternStripeWidth*2
           const patternItems = []
-          const unit = Math.sqrt(Math.pow(this.patternSize, 2) + Math.pow(this.patternSize, 2))/(ids.length*2)
-          ids.forEach((id, index) => {
-            patternItems.push({
-              color: cats[id].color,
-              y: unit - (index * unit),
-              h: unit,
-              w: this.patternSize*2
+          const patternAngle = this.instrument.angle*45
+          for(let i = 0; i < 2; i++){
+            ids.forEach(id => {
+              let color = Color(cats[id].color)
+
+              color = color.darken(this.instrument.shade*0.2)
+              patternItems.push({
+                color: color.rgb().string(),
+                y: index*this.patternStripeWidth,
+                h: this.patternStripeWidth,
+                w: patternSize*2
+              })
+              index++
             })
-            patternItems.push({
-              color: cats[id].color,
-              y: unit - ((index + 2) * unit),
-              h: unit,
-              w: this.patternSize*2
-            })
-          })
-          return patternItems
+          }
+          const pattern = {
+            items: patternItems,
+            size: patternSize,
+            diagonal: patternDiagonal,
+            angle: patternAngle
+          }
+          return pattern
         } else {
           return false
         }
@@ -147,7 +164,7 @@
       opacity: 1;
 
       .main {
-        stroke: rgba(0,0,0,0.6);
+        stroke: rgba(0,0,0,1);
       }
     }
   }
