@@ -24,7 +24,7 @@
               {{ term('budget') }} | <strong>{{ budget.typeString }}</strong>
             </span>
             <span class="tooltip-budget-amount">
-              {{ formatAmount(budget.amount) }} Fr.<sup>{{ budget.sourceIndex }}</sup>
+              {{ formatAmount(budget.amount) }} {{ term('francs_short') }}<sup>{{ budget.sourceIndex }}</sup>
             </span>
           </div>
         </div>
