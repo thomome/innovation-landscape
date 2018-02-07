@@ -10,31 +10,10 @@
               </v-flex>
             </v-layout>
             <v-layout row wrap justify-end>
-              <v-flex xs12 sm6 pa-1>
+
+              <v-flex xs12 sm12 pa-1>
                 <v-select
-                  label="Region"
-                  v-bind:items="regionOption"
-                  v-model="$store.state.region.selected"
-                  multiple
-                  autocomplete
-                  clearable
-                  dense
-                ></v-select>
-              </v-flex>
-              <v-flex xs12 sm6 pa-1>
-                <v-select
-                  label="Category"
-                  v-bind:items="categoryOption"
-                  v-model="$store.state.category.selected"
-                  multiple
-                  autocomplete
-                  clearable
-                  dense
-                ></v-select>
-              </v-flex>
-              <v-flex xs12 sm6 pa-1>
-                <v-select
-                  label="Instrumente"
+                  :label="term('instruments')"
                   v-bind:items="instrumentOption"
                   v-model="$store.state.instrument.selected"
                   multiple
@@ -43,20 +22,42 @@
                   dense
                 ></v-select>
               </v-flex>
-              <v-flex xs12 sm6 pa-1>
-                <v-select
-                  label="Budget"
-                  v-bind:items="typeOption"
-                  v-model="$store.state.type.selected"
-                  multiple
-                  autocomplete
-                  clearable
-                  dense
-                ></v-select>
+
+              <v-flex xs12 sm4 pa-1>
+                <v-subheader>{{ term('region') }}</v-subheader>
+                <v-checkbox
+                  v-for="opt in regionOption" :key="`reg-${opt.value}`"
+                  :label="opt.text"
+                  :value="opt.value"
+                  v-model="$store.state.region.selected"
+                  color="primary"
+                  hide-details
+                ></v-checkbox>
               </v-flex>
 
+              <v-flex xs12 sm4 pa-1>
+                <v-subheader>{{ term('category') }}</v-subheader>
+                <v-checkbox
+                  v-for="opt in categoryOption" :key="`cat-${opt.value}`"
+                  :label="opt.text"
+                  :value="opt.value"
+                  v-model="$store.state.category.selected"
+                  color="primary"
+                  hide-details
+                ></v-checkbox>
+              </v-flex>
+              <v-flex xs12 sm4 pa-1>
+                <v-subheader>{{ term('budget_item') }}</v-subheader>
+                <v-checkbox
+                  v-for="opt in typeOption" :key="`typ-${opt.value}`"
+                  :label="opt.text"
+                  :value="opt.value"
+                  v-model="$store.state.type.selected"
+                  color="primary"
+                  hide-details
+                ></v-checkbox>
+              </v-flex>
             </v-layout>
-
           </v-container>
         </v-card>
       </v-content>
@@ -81,16 +82,34 @@
         return this.$store.getters.instrumentAll.map(o => { return { text: o.institution + ': ' + o.instrument, value: o.id } })
       },
       categoryOption() {
-        return this.$store.getters.categoryAll.map(o => { return { text: o.en, value: o.id } })
+        return this.$store.getters.categoryAll.map(o => { return { text: this.term(o), value: o.id } })
       },
       regionOption() {
-        return this.$store.getters.regionAll.map(o => { return { text: o.en, value: o.id } })
+        return this.$store.getters.regionAll.map(o => { return { text: this.term(o), value: o.id } })
       },
       typeOption() {
-        return this.$store.getters.typeAll.map(o => { return { text: o.en, value: o.id } })
+        return this.$store.getters.typeAll.map(o => { return { text: this.term(o), value: o.id } })
+      },
+      currentLang() {
+        return this.$store.state.language.selected
+      }
+    },
+    methods: {
+      term(obj) {
+        return this.$store.getters.term(obj)
+      },
+      loadTerms() {
+        this.$store.dispatch('loadLanguage', this.currentLang)
+      }
+    },
+    watch: {
+      currentLang: function(newVal, oldVal) {
+        this.loadTerms()
       }
     },
     mounted() {
+      this.loadTerms()
+
       const loadPhaseTable = this.$store.dispatch('loadPhaseTable')
       const loadCategoryTable = this.$store.dispatch('loadCategoryTable')
       const loadRegionTable = this.$store.dispatch('loadRegionTable')
@@ -103,7 +122,6 @@
       }, (err) => {
         console.error(err)
       })
-
     }
   }
 </script>
