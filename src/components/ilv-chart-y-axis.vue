@@ -66,7 +66,12 @@
         return `translate(${left} ${top}) rotate(-90)`
       },
       legendText() {
-        return `In ${this.chart.unit.label} Franken`
+        return `${this.term('in')} ${this.term(this.chart.unit.label)} ${this.term('francs')}`
+      }
+    },
+    methods: {
+      term(obj) {
+        return this.$store.getters.term(obj)
       }
     }
   }

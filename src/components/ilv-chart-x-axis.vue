@@ -10,7 +10,7 @@
       <foreignObject :width="phase.width" :height="chart.spacing">
         <body xmlns="http://www.w3.org/1999/xhtml">
           <div class="phase-text">
-            <span>{{ phase.en }}</span>
+            <span v-html="$store.getters.term(phase)"></span>
           </div>
         </body>
       </foreignObject>

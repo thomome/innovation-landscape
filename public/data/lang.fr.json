@@ -1,0 +1,18 @@
+{
+  "instruments": "instruments",
+  "budget_item": "élément budgétaire",
+  "region": "région",
+  "category": "catégorie",
+  "budget": "budget",
+  "in": "En",
+  "francs": "francs",
+  "francs_short": "CHF",
+  "thousand": "mille",
+  "thousand_short": "mil",
+  "million": "million",
+  "million_short": "mio",
+  "billion": "milliard",
+  "billion_short": "mrd",
+  "trillion": "billion",
+  "trillion_short": "bil"
+}

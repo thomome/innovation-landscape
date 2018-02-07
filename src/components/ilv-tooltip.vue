@@ -21,7 +21,7 @@
           </div>
           <div class="tooltip-budget-description">
             <span class="tooltip-budget-name">
-              Budget | <strong>{{ budget.typeString }}</strong>
+              {{ term('budget') }} | <strong>{{ budget.typeString }}</strong>
             </span>
             <span class="tooltip-budget-amount">
               {{ formatAmount(budget.amount) }} Fr.<sup>{{ budget.sourceIndex }}</sup>
@@ -97,7 +97,7 @@ export default {
     budgetItems() {
       const budgetItems = this.budgetItemsFiltered.map((v) => {
         const item = v
-        item.typeString = v.typeIds.map(id => this.$store.state.type.data[id].en).join('/')
+        item.typeString = v.typeIds.map(id => this.term(this.$store.state.type.data[id])).join('/')
         if(v.typeIds.length === 1) {
           item.background = this.$store.state.type.data[v.typeIds[0]].color
         } else {
@@ -115,11 +115,14 @@ export default {
       return budgetItems
     },
     lead() {
-      return this.$store.state.region.data[this.instrument.regionId].en + ' » ' + this.instrument.categoryIds.map(id => this.$store.state.category.data[id].en).join(', ')
+      return this.term(this.$store.state.region.data[this.instrument.regionId]) + ' » ' + this.instrument.categoryIds.map(id => this.term(this.$store.state.category.data[id])).join(', ')
     }
   },
   methods: {
-    formatAmount: formatAmount
+    formatAmount: formatAmount,
+    term(obj) {
+      return this.$store.getters.term(obj)
+    }
   },
   mounted() {
     window.addEventListener('mousemove', (e) => {

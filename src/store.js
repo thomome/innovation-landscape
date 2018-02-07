@@ -9,7 +9,7 @@ Vue.use(Vuex)
 export const store = new Vuex.Store({
   state: {
     language: {
-      selected: 'de',
+      selected: 'en',
       terms: {}
     },
     instrument: { list: [], data: {}, selected: [], available: [] },
@@ -20,6 +20,9 @@ export const store = new Vuex.Store({
     cacheDuration: 0 //(1000*60*60*24*3) // 3 days,
   },
   mutations: {
+    initLang(state, data) {
+      Vue.set(state.language, 'terms', data.data)
+    },
     initTable(state, data) {
       const tableData = {}
       const tableList = []
@@ -33,6 +36,20 @@ export const store = new Vuex.Store({
     }
   },
   getters: {
+    term(state) {
+      const self = this
+      const lang = state.language.selected
+      const terms = state.language.terms
+      let term = ''
+      return function(data) {
+        if(typeof data === 'object'){
+          term = data[lang] ? data[lang] : 'undefined'
+        } else if(typeof data === 'string') {
+          term = terms[data] ? terms[data] : data
+        }
+        return term
+      }
+    },
     phaseAll({ phase }) {
       return phase.list.map(id => phase.data[id])
     },
@@ -275,7 +292,17 @@ export const store = new Vuex.Store({
         })
       })
     },
-
+    loadLanguage({ commit, state, dispatch, getters }, lang) {
+      return new Promise((resolve, reject) => {
+        ajax(`./public/data/lang.${lang}.json`, data => {
+          const parsedLang = JSON.parse(data)
+          commit('initLang', { data: parsedLang })
+          resolve()
+        }, err => {
+          reject(`${err} (lang-${lang}.json)`)
+        })
+      })
+    },
     saveTable({ commit, state }, data) {
       localStorage.setItem(`db-${data.table}`, JSON.stringify(data.data))
       if(data.table === 'instrument') localStorage.setItem('db-date', Date.now())

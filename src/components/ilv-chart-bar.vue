@@ -3,7 +3,7 @@
     <g @click="openWebsite" @mouseenter="openTooltip" @mouseleave="closeTooltip" class="bar">
       <text v-if="labelPos" x="0" y="0" class="bar-label" :transform="`translate(${labelPos.x}, ${labelPos.y}) rotate(${labelRot})`">
         <tspan x="10" dy="1.2em" style="font-weight: bold">{{ instrument.institution }} {{ instrument.instrument }}</tspan>
-        <tspan x="10" dy="1.2em" style="">{{ formatAmount(instrument.budget[0].amount, 6, 0, 'Fr. ', ' Mio.') }}</tspan>
+        <tspan x="10" dy="1.2em" style="">{{ formatAmount(instrument.budget[0].amount, 6) }} {{ term('million_short') }} {{ term('francs_short') }}</tspan>
       </text>
       <defs v-if="pattern">
         <pattern
@@ -61,8 +61,7 @@
     },
     computed: {
       labelRot() {
-        let rotation = ((this.$store.getters.instrumentAvailable.length-1) * 5) + 60
-        if(rotation > 90) rotation = 90
+        let rotation = this.$store.getters.instrumentAvailable.length > 8 ? 90 : 60
         return rotation*-1
       },
       labelPos() {
@@ -138,6 +137,9 @@
     },
     methods: {
       formatAmount: formatAmount,
+      term(obj) {
+        return this.$store.getters.term(obj)
+      },
       openTooltip() {
         this.eventHub.$emit('tooltip-enter', this.instrument.id)
       },
