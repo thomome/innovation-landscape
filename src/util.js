@@ -199,10 +199,11 @@ function formatAmount(number, unit = 0, places = 0, prefix = '', suffix = '') {
   }
   numberArray.reverse()
   numberArray = numberArray.filter((v) => { return v !== ''})
+  const delimiter = String.fromCharCode(160)
   if(places) {
-    return prefix+numberArray.join("'")+"."+placeNumber+suffix
+    return prefix+numberArray.join(delimiter)+"."+placeNumber+suffix
   } else {
-    return prefix+numberArray.join("'")+suffix
+    return prefix+numberArray.join(delimiter)+suffix
   }
 }
 
