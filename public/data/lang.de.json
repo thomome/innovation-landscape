@@ -1,4 +1,7 @@
 {
+  "export_data": "Daten exportieren (CSV)",
+  "save_graph": "Grafik speichern (SVG)",
+  "filter": "Filter",
   "instruments": "Instrumente",
   "budget_item": "Budgetteil",
   "region": "Region",
@@ -14,5 +17,10 @@
   "billion": "Milliarden",
   "billion_short": "Mrd.",
   "trillion": "Billionen",
-  "trillion_short": "Bil."
+  "trillion_short": "Bil.",
+  "website": "Webseite",
+  "from": "von Phase",
+  "to": "zu Phase",
+  "source": "Quelle",
+  "instrument": "Instrument"
 }
