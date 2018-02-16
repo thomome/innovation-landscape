@@ -1,9 +1,9 @@
 <template>
   <g>
     <g @click="openWebsite" @mouseenter="openTooltip" @mouseleave="closeTooltip" class="bar">
-      <text v-if="labelPos" x="0" y="0" class="bar-label" :transform="`translate(${labelPos.x}, ${labelPos.y}) rotate(${labelRot})`">
+      <text v-if="labelPos" x="0" y="0" class="bar-label" :transform="`translate(${labelPos.x} ${labelPos.y}) rotate(${labelRot})`">
         <tspan x="10" dy="1.2em" style="font-weight: bold">{{ instrument.institution }} {{ instrument.instrument }}</tspan>
-        <tspan x="10" dy="1.2em" style="">{{ formatAmount(instrument.budget[0].amount, 6) }} {{ term('million_short') }} {{ term('francs_short') }}</tspan>
+        <tspan x="10" dy="1.2em" style="">{{ formatAmount(budgetItems[0].amount, 6) }} {{ term('million_short') }} {{ term('francs_short') }}</tspan>
       </text>
       <defs v-if="pattern">
         <pattern
@@ -15,10 +15,7 @@
           :height="pattern.size"
           patternUnits="userSpaceOnUse"
         >
-          <g :transform="`
-            rotate(${pattern.angle}, ${pattern.size*0.5}, ${pattern.size*0.5})
-            translate(${(pattern.diagonal-pattern.size)*-0.5},${(pattern.diagonal-pattern.size)*-0.5})
-          `">
+          <g :transform="`rotate(${pattern.angle} ${pattern.size*0.5} ${pattern.size*0.5}) translate(${(pattern.diagonal-pattern.size)*-0.5} ${(pattern.diagonal-pattern.size)*-0.5})`">
             <rect
               v-for="item in pattern.items"
               x="0"
@@ -26,6 +23,7 @@
               :width="item.w"
               :height="item.h+0.1"
               :style="{ fill: item.color }"
+              stroke="none"
             />
           </g>
         </pattern>
@@ -153,13 +151,8 @@
   }
 </script>
 
-<style lang="scss" scoped>
-  .bar-label {
-    font-size: 1rem;
-  }
+<style lang="scss">
   .bar {
-    opacity: 0.95;
-    shape-rendering: auto;
     cursor: pointer;
 
     &:hover {
@@ -168,10 +161,10 @@
       .main {
         stroke: rgba(0,0,0,1);
       }
+      .outline {
+        opacity: 1;
+      }
     }
-  }
-  .fill-pattern rect {
-    stroke: none;
   }
   .fade-enter-active, .fade-leave-active {
     transition: transform .5s;
