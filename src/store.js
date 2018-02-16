@@ -9,7 +9,7 @@ Vue.use(Vuex)
 export const store = new Vuex.Store({
   state: {
     language: {
-      selected: 'en',
+      selected: 'de',
       terms: {}
     },
     instrument: { list: [], data: {}, selected: [], available: [] },
@@ -20,8 +20,14 @@ export const store = new Vuex.Store({
     cacheDuration: 0 //(1000*60*60*24*3) // 3 days,
   },
   mutations: {
+    setLang(state, data){
+      Vue.set(state.language, 'selected', data.lang)
+    },
     initLang(state, data) {
       Vue.set(state.language, 'terms', data.data)
+    },
+    setSelected(state, data) {
+      Vue.set(state[data.table], 'selected', data.data)
     },
     initTable(state, data) {
       const tableData = {}
