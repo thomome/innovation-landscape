@@ -9,55 +9,7 @@
                 <ilv-chart></ilv-chart>
               </v-flex>
             </v-layout>
-            <v-layout row wrap justify-end>
-
-              <v-flex xs12 sm12 pa-1>
-                <v-select
-                  :label="term('instruments')"
-                  v-bind:items="instrumentOption"
-                  v-model="$store.state.instrument.selected"
-                  multiple
-                  autocomplete
-                  clearable
-                  dense
-                ></v-select>
-              </v-flex>
-
-              <v-flex xs12 sm4 pa-1>
-                <v-subheader>{{ term('region') }}</v-subheader>
-                <v-checkbox
-                  v-for="opt in regionOption" :key="`reg-${opt.value}`"
-                  :label="opt.text"
-                  :value="opt.value"
-                  v-model="$store.state.region.selected"
-                  color="primary"
-                  hide-details
-                ></v-checkbox>
-              </v-flex>
-
-              <v-flex xs12 sm4 pa-1>
-                <v-subheader>{{ term('category') }}</v-subheader>
-                <v-checkbox
-                  v-for="opt in categoryOption" :key="`cat-${opt.value}`"
-                  :label="opt.text"
-                  :value="opt.value"
-                  v-model="$store.state.category.selected"
-                  color="primary"
-                  hide-details
-                ></v-checkbox>
-              </v-flex>
-              <v-flex xs12 sm4 pa-1>
-                <v-subheader>{{ term('budget_item') }}</v-subheader>
-                <v-checkbox
-                  v-for="opt in typeOption" :key="`typ-${opt.value}`"
-                  :label="opt.text"
-                  :value="opt.value"
-                  v-model="$store.state.type.selected"
-                  color="primary"
-                  hide-details
-                ></v-checkbox>
-              </v-flex>
-            </v-layout>
+            <ilv-filter-drawer></ilv-filter-drawer>
           </v-container>
         </v-card>
       </v-content>
@@ -67,29 +19,21 @@
 </template>
 
 <script>
+  import { getHashParams } from './util.js'
   import ilvChart from './components/ilv-chart.vue'
   import ilvTooltip from './components/ilv-tooltip.vue'
+  import ilvFilterDrawer from './components/ilv-filter-drawer.vue'
 
   export default {
     components: {
-      ilvChart, ilvTooltip
+      ilvChart, ilvTooltip, ilvFilterDrawer
     },
     data () {
-      return {}
+      return {
+        hashChanging: false
+      }
     },
     computed: {
-      instrumentOption() {
-        return this.$store.getters.instrumentAll.map(o => { return { text: o.institution + ': ' + o.instrument, value: o.id } })
-      },
-      categoryOption() {
-        return this.$store.getters.categoryAll.map(o => { return { text: this.term(o), value: o.id } })
-      },
-      regionOption() {
-        return this.$store.getters.regionAll.map(o => { return { text: this.term(o), value: o.id } })
-      },
-      typeOption() {
-        return this.$store.getters.typeAll.map(o => { return { text: this.term(o), value: o.id } })
-      },
       currentLang() {
         return this.$store.state.language.selected
       }
@@ -100,6 +44,29 @@
       },
       loadTerms() {
         this.$store.dispatch('loadLanguage', this.currentLang)
+      },
+      loadHash() {
+        const hash = getHashParams()
+        let lang = 'de'
+        let region = []
+        let category = []
+        let type = []
+        let instrument = []
+
+        for (let key in hash) {
+          if(key === 'lang') lang = hash[key]
+          if(key === 'region') region = hash[key].split(',').map(v => parseInt(v))
+          if(key === 'category') category = hash[key].split(',').map(v => parseInt(v))
+          if(key === 'type') type = hash[key].split(',').map(v => parseInt(v))
+          if(key === 'instrument') instrument = hash[key].split(',').map(v => parseInt(v))
+        }
+
+        this.$store.commit('setLang', { lang: lang })
+        this.$store.commit('setSelected', { table: 'region', data: region })
+        this.$store.commit('setSelected', { table: 'category', data: category })
+        this.$store.commit('setSelected', { table: 'type', data: type })
+        this.$store.commit('setSelected', { table: 'instrument', data: instrument })
+
       }
     },
     watch: {
@@ -108,6 +75,14 @@
       }
     },
     mounted() {
+      this.loadHash()
+
+      window.addEventListener('hashchange', (e) => {
+        if(!this.hashChanging) {
+          this.loadHash()
+        }
+      })
+
       this.loadTerms()
 
       const loadPhaseTable = this.$store.dispatch('loadPhaseTable')
@@ -129,5 +104,6 @@
   #app {
     max-width: 848px;
     margin: auto;
+    background: #fff;
   }
 </style>
