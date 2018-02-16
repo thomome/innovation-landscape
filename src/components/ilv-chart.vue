@@ -1,6 +1,13 @@
 <template>
   <div class="chart-container" ref="chart">
-    <svg width="100%" height="500px" ref="chart" :viewBox="viewBox">
+    <svg
+      version="1.1"
+      baseProfile="full"
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%" height="500px"
+      ref="chart"
+      :viewBox="viewBox"
+    >
       <ilv-chart-y-axis
         :chart="chart"
       ></ilv-chart-y-axis>
@@ -23,7 +30,7 @@
 
 <script>
   import BezierEasing from 'bezier-easing'
-  import { intersect } from './../util.js'
+  import { intersect, saveAs } from './../util.js'
   import { mapGetters } from 'vuex'
   import ilvChartBar from './ilv-chart-bar.vue'
   import ilvChartYAxis from './ilv-chart-y-axis.vue'
@@ -132,6 +139,14 @@
       updateSize() {
         this.size.width = this.$refs.chart.clientWidth || this.$refs.chart.parentNode.clientWidth
         this.size.height = this.$refs.chart.clientHeight || this.$refs.chart.parentNode.clientHeight
+      },
+      exportSVG() {
+        const svg = this.$refs.chart.innerHTML
+        const blob = new Blob([svg], {type: "image/svg+xml;charset=UTF-8"})
+        saveAs(blob, this.term('chart_name') + '.svg')
+      },
+      term(obj) {
+        return this.$store.getters.term(obj)
       }
     },
     mounted: function () {
@@ -140,6 +155,9 @@
       this.$refs.chart.addEventListener('wheel', (e) => {
         const mult = e.deltaY < 0 ? -1 : 1
         this.zoom += (this.zoom*0.1*mult)
+      })
+      this.eventHub.$on('export-svg', () => {
+        this.exportSVG()
       })
 
       this.eventHub.$on('tooltip-enter', id => {
@@ -155,7 +173,7 @@
   }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .chart-container {
     position: relative;
     width: 100%;
