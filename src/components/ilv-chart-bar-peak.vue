@@ -1,5 +1,9 @@
 <template>
-  <path :d="path" :fill="fill" :class="[!main ? 'outline' : 'main']"></path>
+  <path
+    :d="path"
+    :fill="fill"
+    :class="[!main ? 'outline' : 'main']"
+  ></path>
 </template>
 
 <script>
@@ -50,8 +54,9 @@
     stroke-width: 1;
 
     &.outline {
-      opacity: 1;
-      fill: rgba(0,0,0,0.3);
+      transition: opacity 0.3s;
+      opacity: 0.5;
+      fill: rgba(0,0,0,0.1);
       //stroke-dasharray: 3px 3px;
     }
   }
