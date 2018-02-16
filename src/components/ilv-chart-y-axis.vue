@@ -1,11 +1,32 @@
 <template>
   <g class="y-axis">
-    <text class="legend" x="0" y="0" :transform="legendTransform">
+    <text
+      class="legend"
+      x="0"
+      y="0"
+      :transform="legendTransform"
+      style="font-size: 0.93rem; alignment-baseline: middle; text-anchor: middle; font-weight: bold;"
+    >
       {{ legendText }}
     </text>
-    <g class="label" v-for="tic in tics" :key="tic.id" :transform="`translate(${tic.x}, ${tic.y})`">
-      <path class="tic" d="M0,1 L-10,1"></path>
-      <path class="grid" d="M0,1 L1500,1"></path>
+    <g
+      class="label"
+      v-for="tic in tics"
+      :key="tic.id"
+      :transform="`translate(${tic.x} ${tic.y})`"
+      style="font-size: 0.93rem;"
+    >
+      <path
+        class="tic"
+        d="M0,1 L-10,1"
+        stroke="#000"
+      ></path>
+      <path
+        class="grid"
+        :d="`M0,1 L${chart.size.width-chart.spacing},1`"
+        stroke="#000"
+        style="stroke-width: 0.15; stroke-dasharray: 3;"
+      ></path>
       <text class="text" x="-2" y="6" text-anchor="end" dominant-baseline="hanging">
         {{ tic.number }}
       </text>
@@ -76,25 +97,3 @@
     }
   }
 </script>
-
-<style lang="scss" scoped>
-  .legend {
-    alignment-baseline: middle;
-    text-anchor: middle;
-    font-weight: 400;
-    font-size: 1.15rem;
-  }
-  .label {
-    font-size: 0.93rem;
-    .tic {
-      stroke: #000;
-    }
-    .grid {
-      opacity: 1;
-      stroke-width: 1;
-      stroke: #ddd;
-      stroke-dasharray: 3;
-      shape-rendering:crispEdges;
-    }
-  }
-</style>
