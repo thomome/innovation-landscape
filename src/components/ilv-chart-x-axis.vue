@@ -3,22 +3,35 @@
     <g
       v-for="(phase, index) in phases"
       :key="`phase-${phase.id}`"
-      :transform="`translate(${phase.x}, ${phase.y})`"
+      :transform="`translate(${phase.x} ${phase.y})`"
       class="x-axis-tic"
     >
-      <path v-if="index !== 0" d="M0,20 L5,30 0,40" fill="none" stroke="#000"></path>
-      <foreignObject :width="phase.width" :height="chart.spacing">
-        <body xmlns="http://www.w3.org/1999/xhtml">
-          <div class="phase-text">
-            <span v-html="$store.getters.term(phase)"></span>
-          </div>
-        </body>
-      </foreignObject>
+      <path
+        v-if="index !== 0"
+        d="M0,20 L5,30 0,40"
+        fill="none"
+        stroke="#000"
+      ></path>
+      <text
+        class="phase-text"
+        dominant-baseline="middle"
+        :transform="`translate(${phase.width*0.5} ${chart.spacing*0.5})`"
+      >
+        <tspan
+          v-for="(line, index2) in phase.lines"
+          :key="`phase-line-${phase.id}-${index2}`"
+          text-anchor="middle"
+          x="0" :y="phase.start + (phase.lineHeight*index2)"
+          style="font-weight: bold; font-size: 0.93rem;"
+        >{{ line }}</tspan>
+      </text>
     </g>
   </g>
 </template>
 
 <script>
+import { formatText } from './../util.js'
+
 export default {
   props: ['chart'],
   computed: {
@@ -30,33 +43,17 @@ export default {
         item.x = chart.spacing + (i*((chart.size.width-chart.spacing)/phases.length))
         item.y = chart.size.height - (chart.spacing),
         item.width = (chart.size.width-chart.spacing)/phases.length
+        item.lineHeight = 15
+        item.lines = formatText(this.term(v), item.lineHeight, item.width*0.9)
+        item.start = (item.lines.length*item.lineHeight-item.lineHeight)*-0.5
         return item
       })
+    }
+  },
+  methods: {
+    term(obj) {
+      return this.$store.getters.term(obj)
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .x-axis-tic {
-    body {
-      width: 100%;
-      height: 100%;
-    }
-    .phase-text {
-      display: table;
-      text-align: center;
-      padding: 0.5rem 1rem;
-      line-height: 1.2;
-      font-weight: bold;
-      font-size: 0.93rem;
-      height: 100%;
-      width: 100%;
-
-      span {
-        display: table-cell;
-        vertical-align: middle;
-      }
-    }
-  }
-</style>
