@@ -207,6 +207,51 @@ function formatAmount(number, unit = 0, places = 0, prefix = '', suffix = '') {
   }
 }
 
+function formatText(text, fontSize = 12, width = 100) {
+  const chars = [{
+    char: ' ', replace: ''
+  }, {
+    char: '­', replace: '-'
+  }, {
+    char: '-', replace: ''
+  }]
+  const lines = []
+  text = text.replace(/&shy;/g, '­')
+  let charsPerLine = width*(2.25/fontSize)
+  if(charsPerLine < 1) charsPerLine = 1
+  let stopper = 0
+
+  while(text.length > 0 && stopper < 100) {
+    const tempText = text.slice(0, Math.floor(charsPerLine))
+    let end = charsPerLine
+    let char = ''
+    if(end < text.length){
+      let largestIndex = 0
+      chars.forEach(v => {
+        const tempIndex = tempText.lastIndexOf(v.char)
+        if(tempIndex !== -1 && tempIndex > largestIndex) {
+
+          end = tempIndex+v.char.length
+          largestIndex = end
+          char = v.replace
+        }
+      })
+    }
+    const line = tempText.slice(0, end)
+    text = text.replace(line, '')
+    lines.push(line + char)
+
+    stopper++
+  }
+  return lines
+}
+
+function htmlDecode( html ) {
+    const el = document.createElement( 'span' )
+    el.innerHTML = html
+    return el.innerText
+}
+
 
 export {
   saveAs,
@@ -218,5 +263,7 @@ export {
   extend,
   accentFold,
   roundNumber,
-  formatAmount
+  formatAmount,
+  formatText,
+  htmlDecode
 }
