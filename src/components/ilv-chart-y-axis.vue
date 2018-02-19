@@ -5,7 +5,7 @@
       x="0"
       y="0"
       :transform="legendTransform"
-      style="font-size: 0.93rem; alignment-baseline: middle; text-anchor: middle; font-weight: bold;"
+      style="font-size: 0.97rem; alignment-baseline: middle; text-anchor: middle; font-weight: bold;"
     >
       {{ legendText }}
     </text>
@@ -18,16 +18,21 @@
     >
       <path
         class="tic"
-        d="M0,1 L-10,1"
+        d="M5,0 L-2,0"
         stroke="#000"
       ></path>
       <path
         class="grid"
-        :d="`M0,1 L${chart.size.width-chart.spacing},1`"
+        v-if="tic.number !== 0"
+        :d="`M0,0 L${chart.size.width-chart.spacing},0`"
         stroke="#000"
-        style="stroke-width: 0.15; stroke-dasharray: 3;"
+        style="stroke-width: 1; stroke-dasharray: 3; opacity: 0.25; shape-rendering: crispEdges ;"
       ></path>
-      <text class="text" x="-2" y="6" text-anchor="end" dominant-baseline="hanging">
+      <text
+        class="text"
+        x="-8" y="-1"
+        style="text-anchor: end; dominant-baseline: central;"
+      >
         {{ tic.number }}
       </text>
     </g>
@@ -48,7 +53,7 @@
       tics() {
         const axis = this.axis
         const tics = []
-        for (let i = 0; i < this.chart.max*1.3; i += axis.ticSize) {
+        for (let i = 0; i < this.chart.max; i += axis.ticSize) {
           tics.push({
             id: `${i}-${this.label}`,
             number: roundNumber(i * Math.pow(10, this.chart.unit.start * -1), 2),
@@ -83,7 +88,7 @@
       },
       legendTransform() {
         const top = (this.chart.size.height - this.chart.spacing)*0.5
-        const left = this.chart.spacing*0.33;
+        const left = this.chart.spacing*0.25;
         return `translate(${left} ${top}) rotate(-90)`
       },
       legendText() {
