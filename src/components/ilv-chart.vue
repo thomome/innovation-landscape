@@ -119,20 +119,21 @@
       maxWithZoom: function(newVal) {
         const start = Date.now()
         const vm = this
-        const lastVal = vm.max;
+        const lastVal = vm.max
+        const restart = this.animation === null ? true : false
         this.animation = function () {
           const progress = 1/vm.duration*(Date.now() - start)
           const ease = vm.easing(progress)
           vm.max = lastVal + ((newVal - lastVal) * ease)
-
           if(progress < 1) {
             requestAnimationFrame(vm.animation)
           } else {
             vm.max = newVal
+            vm.animation = null
           }
         }
 
-        this.animation()
+        if(restart) this.animation()
       }
     },
     methods: {
@@ -153,7 +154,7 @@
       this.updateSize()
       window.addEventListener('resize', this.updateSize)
       this.$refs.chart.addEventListener('wheel', (e) => {
-        const mult = e.deltaY < 0 ? -1 : 1
+        const mult = e.deltaY*0.3
         this.zoom += (this.zoom*0.1*mult)
       })
       this.eventHub.$on('export-svg', () => {
