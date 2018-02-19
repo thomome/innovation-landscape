@@ -89,7 +89,6 @@
       const loadCategoryTable = this.$store.dispatch('loadCategoryTable')
       const loadRegionTable = this.$store.dispatch('loadRegionTable')
       const loadTypeTable = this.$store.dispatch('loadTypeTable')
-
       Promise.all([ loadPhaseTable, loadCategoryTable, loadRegionTable, loadTypeTable ]).then(() => {
         this.$store.dispatch('loadInstrumentTable').catch((err) => {
           console.error(err)
