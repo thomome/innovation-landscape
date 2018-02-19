@@ -1,9 +1,17 @@
 <template>
   <g>
     <g @click="openWebsite" @mouseenter="openTooltip" @mouseleave="closeTooltip" class="bar">
-      <text v-if="labelPos" x="0" y="0" class="bar-label" :transform="`translate(${labelPos.x} ${labelPos.y}) rotate(${labelRot})`">
-        <tspan x="10" dy="1.2em" style="font-weight: bold">{{ instrument.institution }} {{ instrument.instrument }}</tspan>
-        <tspan x="10" dy="1.2em" style="">{{ formatAmount(budgetItems[0].amount, 6) }} {{ term('million_short') }} {{ term('francs_short') }}</tspan>
+      <text
+        v-if="labelPos"
+        x="0" y="0"
+        :class="[ 'bar-label', showLabel ? '' : 'label-on-hover']"
+        :transform="`translate(${labelPos.x} ${labelPos.y}) rotate(-65)`"
+      >
+        <tspan
+          x="10" dy="15"
+          style="font-weight: bold"
+        >{{ term(instrument) }}</tspan>
+        <tspan x="10" dy="15">{{ formatAmount(budgetItems[0].amount, 6) }} {{ term('million_short') }} {{ term('francs_short') }}</tspan>
       </text>
       <defs v-if="pattern">
         <pattern
@@ -58,9 +66,10 @@
       }
     },
     computed: {
-      labelRot() {
-        let rotation = this.$store.getters.instrumentAvailable.length > 8 ? 90 : 60
-        return rotation*-1
+      showLabel() {
+        let show = this.$store.getters.instrumentAvailable.length > 10 ? false : true
+        console.log(show)
+        return show
       },
       labelPos() {
         if(this.budgetItems[0]){
@@ -155,8 +164,19 @@
   .bar {
     cursor: pointer;
 
+    .label-on-hover {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
     &:hover {
       opacity: 1;
+
+      .label-on-hover {
+        opacity: 1;
+        visibility: visible;
+      }
 
       .main {
         stroke: rgba(0,0,0,1);
