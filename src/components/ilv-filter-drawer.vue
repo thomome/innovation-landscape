@@ -1,17 +1,19 @@
 <template>
   <v-layout row wrap justify-end class="filter-drawer">
 
-    <v-flex xs4 sm4>
+    <v-flex xs8 sm8>
       <div class="text-xs-left">
+        <v-btn small color="primary" @click="exportData()">{{ term('export_data') }}</v-btn>
+        <v-btn small color="secondary" @click="exportChart()">{{ term('save_graph') }}</v-btn>
+      </div>
+    </v-flex>
+
+    <v-flex xs4 sm4>
+      <div class="text-xs-right">
         <v-btn outline small @click="extended = !extended">{{ term('filter') }} <v-icon right>{{ extended ? 'arrow_drop_up' : 'arrow_drop_down' }}</v-icon></v-btn>
       </div>
     </v-flex>
-    <v-flex xs8 sm8>
-      <div class="text-xs-right">
-        <v-btn small color="primary" @click="exportData()">{{ term('export_data') }}</v-btn>
-        <v-btn small color="secondary" @click="eventHub.$emit('export-svg')">{{ term('save_graph') }}</v-btn>
-      </div>
-    </v-flex>
+
 
     <v-layout row wrap v-show="extended" class="extendable-filter">
       <v-flex xs12 sm12 pa-1>
@@ -77,7 +79,7 @@
     },
     computed: {
       instrumentOption() {
-        return this.$store.getters.instrumentAll.map(o => { return { text: `${o.institution} ${o.instrument}`.trim(), value: o.id } })
+        return this.$store.getters.instrumentAll.map(o => { return { text: this.term(o), value: o.id } })
       },
       instrumentSelected: {
         get: function() {
@@ -134,11 +136,14 @@
       }
     },
     methods: {
+      exportChart() {
+        this.eventHub.$emit('export-svg')
+      },
       exportData() {
         const budgetTypes = {}
         const table = this.$store.getters.instrumentAvailable.map((v) => {
           const item = {}
-          item[this.term('instrument')] = v.institution + ' ' + v.instrument
+          item[this.term('instrument')] = this.term(v)
           item[this.term('category')] = v.categoryIds.map(id => this.term(this.$store.state.category.data[id])).join(', ')
           item[this.term('region')] = this.term(this.$store.state.region.data[v.regionId])
           item[this.term('from')] = htmlDecode(this.term(this.$store.state.phase.data[Math.floor(v.from)]))
