@@ -10,7 +10,7 @@
       }"
     >
       <div class="tooltip">
-        <div class="tooltip-title">{{ instrument.institution }} {{ instrument.instrument }}</div>
+        <div class="tooltip-title">{{ term(instrument) }}</div>
         <div class="tooltip-lead">{{ lead }}</div>
         <div v-for="budget in budgetItems" :key="`${instrument.id}-${budget.typeIds.join(',')}`">
           <div class="tooltip-budget-bar">
@@ -169,6 +169,8 @@ export default {
   .tooltip-container {
     z-index: 1000000;
     position: absolute;
+    font-family: "Roboto", sans-serif;
+    font-size: 14px;
     left: 0;
     top: 0;
     margin-left: 15px;
