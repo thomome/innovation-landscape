@@ -17,7 +17,7 @@ export const store = new Vuex.Store({
     category: { list: [], data: {}, selected: [], available: [] },
     phase: { list: [], data: {}, selected: [], available: [] },
     type: { list: [], data: {}, selected: [], available: [] },
-    cacheDuration: 0 //(1000*60*60*24*3) // 3 days,
+    cacheDuration: 0//(1000*60*60*24*3) // 3 days,
   },
   mutations: {
     setLang(state, data){
@@ -134,21 +134,6 @@ export const store = new Vuex.Store({
       })
 
       return sortedInstruments
-    },
-
-    xAxis(state, getters) {
-      const instruments = getters.instrumentAvailable
-      let minFrom = Infinity
-      let maxTo = 0
-      instruments.forEach(v => {
-        if(minFrom > v.from) minFrom = v.from
-        if(maxTo < v.to) maxTo = v.to
-      })
-      return {
-        from: Math.floor(minFrom),
-        to: Math.ceil(maxTo),
-        tics: Math.ceil(maxTo) - Math.floor(minFrom)
-      }
     }
   },
   actions: {
@@ -168,8 +153,8 @@ export const store = new Vuex.Store({
             })
             commit('initTable', { table: 'region', data: preparedData })
             dispatch('saveTable', { table: 'region', data: preparedData })
-            resolve()
           }
+          resolve()
         }, err => {
           reject(err)
         })
@@ -192,8 +177,8 @@ export const store = new Vuex.Store({
             })
             commit('initTable', { table: 'category', data: preparedData })
             dispatch('saveTable', { table: 'category', data: preparedData })
-            resolve()
           }
+          resolve()
         }, err => {
           reject(err)
         })
@@ -214,8 +199,8 @@ export const store = new Vuex.Store({
             })
             commit('initTable', { table: 'phase', data: preparedData })
             dispatch('saveTable', { table: 'phase', data: preparedData })
-            resolve()
           }
+          resolve()
         }, err => {
           reject(err)
         })
@@ -237,8 +222,8 @@ export const store = new Vuex.Store({
             })
             commit('initTable', { table: 'type', data: preparedData })
             dispatch('saveTable', { table: 'type', data: preparedData })
-            resolve()
           }
+          resolve()
         }, err => {
           reject(err)
         })
@@ -277,8 +262,10 @@ export const store = new Vuex.Store({
 
               return {
                 id: parseInt(v.id),
-                institution: v.institution ? v.institution.trim() : '',
-                instrument: v.instrument ? v.instrument.trim() : '',
+                de: v.de ? v.de.trim() : '',
+                fr: v.fr ? v.fr.trim() : '',
+                it: v.it ? v.it.trim() : '',
+                en: v.en ? v.en.trim() : '',
                 regionId: parseInt(v.regionId),
                 categoryIds: categoryIds,
                 from: parseFloat(v.from),
@@ -291,8 +278,8 @@ export const store = new Vuex.Store({
 
             commit('initTable', { table: 'instrument', data: preparedData })
             dispatch('saveTable', { table: 'instrument', data: preparedData })
-            resolve()
           }
+          resolve()
         }, err => {
           reject(err)
         })
@@ -319,7 +306,7 @@ export const store = new Vuex.Store({
         const dbDate = localStorage.getItem('db-date')
         const dbTable = localStorage.getItem(`db-${data.table}`)
         if((Date.now() - dbDate) < state.cacheDuration && dbTable){
-          commit('initData', { table: data.table, data: JSON.parse(dbTable) })
+          commit('initTable', { table: data.table, data: JSON.parse(dbTable) })
           resolve(false)
         } else {
           ajax(`./public/data/${data.table}.csv`, data => {
