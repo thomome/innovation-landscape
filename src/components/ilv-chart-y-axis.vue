@@ -92,7 +92,7 @@
         return `translate(${left} ${top}) rotate(-90)`
       },
       legendText() {
-        return `${this.term('in')} ${this.term(this.chart.unit.label)} ${this.term('francs')}`
+        return `${this.term('in')} ${this.term(this.chart.unit.label)} ${this.term('francs')} ${this.term('per_year')}`
       }
     },
     methods: {
