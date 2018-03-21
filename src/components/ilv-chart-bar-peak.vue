@@ -50,14 +50,15 @@
 <style lang="scss" scoped>
   path {
     transition: stroke 0.2s;
-    stroke: rgba(0,0,0,0.1);
+    stroke: rgba(0,0,0,0);
     stroke-width: 1;
+    opacity: 0.95;
 
     &.outline {
       transition: opacity 0.3s;
       opacity: 0.5;
       fill: rgba(0,0,0,0.1);
-      //stroke-dasharray: 3px 3px;
+      stroke-dasharray: 3px 3px;
     }
   }
 </style>
