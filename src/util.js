@@ -183,7 +183,7 @@ function accentFold(inStr) {
 function formatAmount(number, unit = 0, places = 0, prefix = '', suffix = '') {
   number = number * Math.pow(10, unit*-1)
   let placeNumber = Math.round((number % 1) * Math.pow(10, places))
-  const numberString = Math.floor(number).toString()
+  const numberString = Math.round(number).toString()
   placeNumber = placeNumber.toString()
   for(let i = 0; i < places; i++) {
     placeNumber += '0'
@@ -200,7 +200,7 @@ function formatAmount(number, unit = 0, places = 0, prefix = '', suffix = '') {
   numberArray.reverse()
   numberArray = numberArray.filter((v) => { return v !== ''})
   const delimiter = ' '
-  if(places) {
+  if(places && parseInt(placeNumber) !== 0) {
     return prefix+numberArray.join(delimiter)+"."+placeNumber+suffix
   } else {
     return prefix+numberArray.join(delimiter)+suffix
