@@ -4,14 +4,14 @@
       <text
         v-if="labelPos"
         x="0" y="0"
-        :class="[ 'bar-label', showLabel ? '' : 'label-on-hover']"
-        :transform="`translate(${labelPos.x} ${labelPos.y}) rotate(-65)`"
+        :class="[ 'bar-label', showLabel ? '' : 'label-on-hover' ]"
+        :transform="`translate(${labelPos.x} ${labelPos.y}) rotate(-90)`"
       >
         <tspan
           x="10" dy="15"
           style="font-weight: bold"
         >{{ term(instrument) }}</tspan>
-        <tspan x="10" dy="15">{{ formatAmount(budgetItems[0].amount, 6) }} {{ term('million_short') }} {{ term('francs_short') }}</tspan>
+        <tspan x="10" dy="15">{{ formatAmount(budgetItems[0].amount, 6, 1) }} {{ term('million_short') }} {{ term('francs_short') }}</tspan>
       </text>
       <defs v-if="pattern">
         <pattern
@@ -67,9 +67,9 @@
     },
     computed: {
       showLabel() {
-        let show = this.$store.getters.instrumentAvailable.length > 10 ? false : true
-        console.log(show)
-        return show
+        const upperLimit = this.chart.max - (this.chart.max*0.2) > this.budgetItems[0].amount
+        const lowerLimit = this.chart.max * 0.05 < this.budgetItems[0].amount
+        return (upperLimit && lowerLimit)
       },
       labelPos() {
         if(this.budgetItems[0]){
@@ -135,7 +135,8 @@
         } else if(ids.length === 1) {
           const cats = this.$store.state.category.data
           let color = Color(cats[ids[0]].color)
-          color = color.darken(this.instrument.shade*0.2)
+
+          color = color.blacken(this.instrument.shade*0.6).darken(this.instrument.shade*0.5)
           return color.rgb().string()
         } else {
           return '#ffffff'
