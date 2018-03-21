@@ -104,18 +104,44 @@ export const store = new Vuex.Store({
       const selectedRegions = state.region.selected
       const selectedInstruments = state.instrument.selected
       const selectedCategories = state.category.selected
+      const selectedTypes = state.type.selected
+
 
       const instruments = getters.instrumentAll.filter(v => {
         const cI = (selectedInstruments.indexOf(v.id) !== -1 || selectedInstruments.length === 0)
         const cR = (selectedRegions.indexOf(v.regionId) !== -1 || selectedRegions.length === 0)
         const cC = (intersect(selectedCategories, v.categoryIds).length !== 0 || selectedCategories.length === 0)
+        let cT = selectedTypes.length === 0
+        if(!cT) {
+          v.budget.some(b => {
+            if(intersect(selectedTypes, b.typeIds).length !== 0) {
+              cT = true
+              return false
+            }
+          })
+        }
 
-        if(cI && cR && cC) {
+        if(cI && cR && cC && cT) {
           return true
         }
       })
 
-      const sortedInstruments = instruments.sort((a,b) => { return a.layer - b.layer })
+      const sortedInstruments = instruments.sort((a,b) => {
+        let aMax = 0
+        a.budget.forEach(bud => {
+          if(intersect(selectedTypes, bud.typeIds).length !== 0 || selectedTypes.length === 0) {
+            if(bud.amount > aMax) aMax = bud.amount
+          }
+        })
+
+        let bMax = 0
+        b.budget.forEach(bud => {
+          if(intersect(selectedTypes, bud.typeIds).length !== 0 || selectedTypes.length === 0) {
+            if(bud.amount > bMax) bMax = bud.amount
+          }
+        })
+        return bMax - aMax
+      })
 
       const instsPerCategory = {}
       sortedInstruments.some((v, i) => {
@@ -270,7 +296,6 @@ export const store = new Vuex.Store({
                 categoryIds: categoryIds,
                 from: parseFloat(v.from),
                 to: parseFloat(v.to),
-                layer: parseFloat(v.layer),
                 website: v.website ? v.website.trim() : '',
                 budget: items
               }
