@@ -2,8 +2,8 @@
   <div>
     <v-app>
       <v-content>
-        <v-card flat tile>
-          <v-container fluid pa-0>
+        <v-card flat tile >
+          <v-container fluid pa-0 ref="app">
             <v-layout row wrap>
               <v-flex xs12 pa-0>
                 <ilv-chart></ilv-chart>
@@ -47,6 +47,7 @@
       },
       loadHash() {
         const hash = getHashParams()
+        const state = this.$store.state
         let lang = 'de'
         let region = []
         let category = []
@@ -61,12 +62,18 @@
           if(key === 'instrument') instrument = hash[key].split(',').map(v => parseInt(v))
         }
 
-        this.$store.commit('setLang', { lang: lang })
-        this.$store.commit('setSelected', { table: 'region', data: region })
-        this.$store.commit('setSelected', { table: 'category', data: category })
-        this.$store.commit('setSelected', { table: 'type', data: type })
-        this.$store.commit('setSelected', { table: 'instrument', data: instrument })
+        if(lang != state.language.selected) this.$store.commit('setLang', { lang: lang })
+        if(region.toString() != state.region.selected.toString()) this.$store.commit('setSelected', { table: 'region', data: region })
+        if(category.toString() != state.category.selected.toString()) this.$store.commit('setSelected', { table: 'category', data: category })
+        if(type.toString() != state.type.selected.toString()) this.$store.commit('setSelected', { table: 'type', data: type })
+        if(instrument.toString() != state.instrument.selected.toString()) this.$store.commit('setSelected', { table: 'instrument', data: instrument })
 
+      },
+      resizeIframe(){
+
+        const extra = 200
+        const height = this.$refs.app.clientHeight
+        window.frameElement.style.height = (height+extra) + 'px'
       }
     },
     watch: {
@@ -75,13 +82,27 @@
       }
     },
     mounted() {
-      this.loadHash()
+      const self = this
+      const domain = document.domain.match(/[a-z0-9\-]*.[a-z0-9\-]+$/i)[0]
+      document.domain = domain
+      const iframe = window.frameElement
 
-      window.addEventListener('hashchange', (e) => {
-        if(!this.hashChanging) {
+      if(iframe){
+        window.addEventListener('resize', this.resizeIframe)
+        this.eventHub.$on('app-resize', () => {
+          this.resizeIframe()
+        })
+
+        this.iframeHashUpdater = window.setInterval(() => {
           this.loadHash()
-        }
-      })
+        }, 50)
+      } else {
+        window.addEventListener('hashchange', () => {
+          this.loadHash()
+        })
+      }
+
+      this.loadHash()
 
       this.loadTerms()
 
@@ -100,6 +121,9 @@
   }
 </script>
 <style lang="scss">
+  html {
+    overflow: hidden;
+  }
   #app {
     max-width: 848px;
     margin: auto;
