@@ -1,6 +1,6 @@
 {
-  "export_data": "Daten exportieren (CSV)",
-  "save_graph": "Grafik speichern (SVG)",
+  "export_data": "Daten exportieren",
+  "save_graph": "Grafik speichern",
   "filter": "Filter",
   "instruments": "Instrumente",
   "budget_item": "Förderanteil",
@@ -23,5 +23,8 @@
   "from": "von Phase",
   "to": "zu Phase",
   "source": "Quelle",
-  "instrument": "Instrument"
+  "instrument": "Instrument",
+  "export_name": "Innovationslandschaft_Export",
+  "chart_name": "Innovationslandschaft_Grafik",
+  "source_message": "Die vorliegende Liste von Förderinstrumenten basiert auf benutzerdefinierten Abfragen aus der Innovationslandschaft des schweizerische Bundesamts für Umwelt BAFU. Geben Sie bei jeglicher Benutzung dieser Daten das schweizerische Bundesamt für Umwelt als Quelle an."
 }
