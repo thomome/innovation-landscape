@@ -3,8 +3,8 @@
 
     <v-flex xs8 sm8>
       <div class="text-xs-left">
-        <v-btn small color="primary" @click="exportData()">{{ term('export_data') }}</v-btn>
-        <v-btn small color="secondary" @click="exportChart()">{{ term('save_graph') }}</v-btn>
+        <v-btn small color="primary" @click="exportData()">{{ term('export_data') }} (CSV)</v-btn>
+        <v-btn small color="secondary" @click="exportChart()">{{ term('save_graph') }} (SVG)</v-btn>
       </div>
     </v-flex>
 
@@ -174,6 +174,9 @@
       term(obj) {
         return this.$store.getters.term(obj)
       }
+    },
+    updated() {
+      this.eventHub.$emit('app-resize')
     }
   }
 </script>
