@@ -154,6 +154,7 @@
       this.updateSize()
       window.addEventListener('resize', this.updateSize)
       this.$refs.chart.addEventListener('wheel', (e) => {
+        e.preventDefault()
         const mult = e.deltaY > 0 ? 1.5 : -1.5
         this.zoom += (this.zoom*0.1*mult)
       })
