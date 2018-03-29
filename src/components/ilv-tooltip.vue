@@ -175,8 +175,8 @@ export default {
     top: 0;
     margin-left: 15px;
     margin-top: 30px;
-    min-width: 300px;
-    max-width: 400px;
+    min-width: 400px;
+    max-width: 500px;
 
     .tooltip {
       position: relative;
