@@ -50,7 +50,7 @@
 <style lang="scss" scoped>
   path {
     transition: stroke 0.2s;
-    stroke: rgba(0,0,0,0);
+    stroke: rgba(0,0,0,0.5);
     stroke-width: 1;
     opacity: 0.95;
 
