@@ -108,16 +108,6 @@
         })
       }
 
-      // standard params for "Umwelt Schweiz" view
-      const hash = getHashParams()
-      if(!hash.region && !hash.type && !hash.instrument && !hash.category) {
-        console.log('init');
-        setHashParams('region', [0])
-        setHashParams('type', [1])
-        setHashParams('zoom', [0.07])
-      }
-
-
       this.loadHash()
 
       this.loadTerms()
@@ -127,7 +117,15 @@
       const loadRegionTable = this.$store.dispatch('loadRegionTable')
       const loadTypeTable = this.$store.dispatch('loadTypeTable')
       Promise.all([ loadPhaseTable, loadCategoryTable, loadRegionTable, loadTypeTable ]).then(() => {
-        this.$store.dispatch('loadInstrumentTable').catch((err) => {
+        this.$store.dispatch('loadInstrumentTable').then(() => {
+          // standard params for "Umwelt Schweiz" view
+          const hash = getHashParams()
+          if(!hash.region && !hash.type && !hash.instrument && !hash.category) {
+            setHashParams('region', [0])
+            setHashParams('type', [1])
+            setHashParams('zoom', [0.07])
+          }
+        }).catch((err) => {
           console.error(err)
         })
       }, (err) => {
