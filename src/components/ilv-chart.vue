@@ -1,5 +1,11 @@
 <template>
   <div class="chart-container" ref="chart">
+    <div class="zoom-navigation">
+      <v-btn-toggle>
+        <v-btn depressed color="grey lighten-2" @click="zoomIn()"><v-icon>add</v-icon></v-btn>
+        <v-btn depressed color="grey lighten-2" @click="zoomOut()"><v-icon>remove</v-icon></v-btn>
+      </v-btn-toggle>
+    </div>
     <svg
       version="1.1"
       baseProfile="full"
@@ -30,7 +36,7 @@
 
 <script>
   import BezierEasing from 'bezier-easing'
-  import { intersect, saveAs } from './../util.js'
+  import { intersect, saveAs, setHashParams } from './../util.js'
   import { mapGetters } from 'vuex'
   import ilvChartBar from './ilv-chart-bar.vue'
   import ilvChartYAxis from './ilv-chart-y-axis.vue'
@@ -137,6 +143,14 @@
       }
     },
     methods: {
+      zoomIn() {
+        this.zoom += (this.zoom*-0.5)
+        setHashParams('zoom', false)
+      },
+      zoomOut() {
+        this.zoom += (this.zoom*0.5)
+        setHashParams('zoom', false)
+      },
       updateSize() {
         this.size.width = this.$refs.chart.clientWidth || this.$refs.chart.parentNode.clientWidth
         this.size.height = this.$refs.chart.clientHeight || this.$refs.chart.parentNode.clientHeight
@@ -157,6 +171,7 @@
         e.preventDefault()
         const mult = e.deltaY > 0 ? 1.5 : -1.5
         this.zoom += (this.zoom*0.1*mult)
+        setHashParams('zoom', false)
       })
       this.eventHub.$on('export-svg', () => {
         this.exportSVG()
@@ -167,6 +182,9 @@
       })
       this.eventHub.$on('tooltip-leave', () => {
         this.activeId = null
+      })
+      this.eventHub.$on('set-zoom', level => {
+        if(this.zoom != level) this.zoom = level
       })
     },
     beforeDestroy: function () {
@@ -182,6 +200,16 @@
     height: 0;
     padding-bottom: 75%;
     overflow: hidden;
+
+    .zoom-navigation {
+      width: auto;
+      height: auto;
+      position: absolute;
+      right: 0;
+      top: 0;
+      margin: 15px;
+      z-index: 5;
+    }
 
     svg {
       position: absolute;
