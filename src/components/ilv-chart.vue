@@ -2,8 +2,8 @@
   <div class="chart-container" ref="chart">
     <div class="zoom-navigation">
       <v-btn-toggle>
-        <v-btn depressed color="grey lighten-2" @click="zoomIn()"><v-icon>add</v-icon></v-btn>
-        <v-btn depressed color="grey lighten-2" @click="zoomOut()"><v-icon>remove</v-icon></v-btn>
+        <v-btn depressed color="grey small lighten-2" @click="zoomIn()"><v-icon>add</v-icon></v-btn>
+        <v-btn depressed color="grey small lighten-2" @click="zoomOut()"><v-icon>remove</v-icon></v-btn>
       </v-btn-toggle>
     </div>
     <svg
