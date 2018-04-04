@@ -19,7 +19,7 @@
 </template>
 
 <script>
-  import { getHashParams } from './util.js'
+  import { getHashParams, setHashParams } from './util.js'
   import ilvChart from './components/ilv-chart.vue'
   import ilvTooltip from './components/ilv-tooltip.vue'
   import ilvFilterDrawer from './components/ilv-filter-drawer.vue'
@@ -49,12 +49,14 @@
         const hash = getHashParams()
         const state = this.$store.state
         let lang = 'de'
+        let zoom = false
         let region = []
         let category = []
         let type = []
         let instrument = []
 
         for (let key in hash) {
+          if(key === 'zoom') zoom = parseFloat(hash[key])
           if(key === 'lang') lang = hash[key]
           if(key === 'region') region = hash[key].split(',').map(v => parseInt(v))
           if(key === 'category') category = hash[key].split(',').map(v => parseInt(v))
@@ -63,11 +65,15 @@
         }
 
         if(lang != state.language.selected) this.$store.commit('setLang', { lang: lang })
+        if(zoom) {
+          window.setTimeout(() => {
+            this.eventHub.$emit('set-zoom', zoom)
+          }, 10)
+        }
         if(region.toString() != state.region.selected.toString()) this.$store.commit('setSelected', { table: 'region', data: region })
         if(category.toString() != state.category.selected.toString()) this.$store.commit('setSelected', { table: 'category', data: category })
         if(type.toString() != state.type.selected.toString()) this.$store.commit('setSelected', { table: 'type', data: type })
         if(instrument.toString() != state.instrument.selected.toString()) this.$store.commit('setSelected', { table: 'instrument', data: instrument })
-
       },
       resizeIframe(){
 
@@ -101,6 +107,16 @@
           this.loadHash()
         })
       }
+
+      // standard params for "Umwelt Schweiz" view
+      const hash = getHashParams()
+      if(!hash.region && !hash.type && !hash.instrument && !hash.category) {
+        console.log('init');
+        setHashParams('region', [0])
+        setHashParams('type', [1])
+        setHashParams('zoom', [0.07])
+      }
+
 
       this.loadHash()
 
