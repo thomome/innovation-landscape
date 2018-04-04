@@ -180,31 +180,13 @@ function accentFold(inStr) {
   });
 }
 
-function formatAmount(number, unit = 0, places = 0, prefix = '', suffix = '') {
-  number = number * Math.pow(10, unit*-1)
-  let placeNumber = Math.round((number % 1) * Math.pow(10, places))
-  const numberString = Math.round(number).toString()
-  placeNumber = placeNumber.toString()
-  for(let i = 0; i < places; i++) {
-    placeNumber += '0'
-  }
-  placeNumber = placeNumber.slice(0, places)
-
-  let numberArray = []
-  const l = numberString.length
-  for(var i = l; i >= 0; i = i - 3){
-    const from = i-3 > 0 ? i-3 : 0
-    const to = i > 0 ? i : 0
-    numberArray.push(numberString.slice(from, to))
-  }
-  numberArray.reverse()
-  numberArray = numberArray.filter((v) => { return v !== ''})
-  const delimiter = ' '
-  if(places && parseInt(placeNumber) !== 0) {
-    return prefix+numberArray.join(delimiter)+"."+placeNumber+suffix
-  } else {
-    return prefix+numberArray.join(delimiter)+suffix
-  }
+function formatAmount(n, p = 0, dp = 0, prefix = '', suffix = '') {
+  if(p) n = n/Math.pow(10,p)
+  var w = n.toFixed(dp), k = w|0, b = n < 0 ? 1 : 0,
+      u = Math.abs(w-k), d = (''+u.toFixed(dp)).substr(2, dp),
+      s = ''+k, i = s.length, r = '';
+  while ( (i-=3) > b ) { r = ' ' + s.substr(i, 3) + r; }
+  return prefix + '' + s.substr(0, i + 3) + r + (d ? '.'+d: '') + '' + suffix;
 }
 
 function formatText(text, fontSize = 12, width = 100) {
