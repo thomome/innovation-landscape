@@ -17,7 +17,7 @@ export const store = new Vuex.Store({
     category: { list: [], data: {}, selected: [], available: [] },
     phase: { list: [], data: {}, selected: [], available: [] },
     type: { list: [], data: {}, selected: [], available: [] },
-    cacheDuration: 0//(1000*60*60*24*3) // 3 days,
+    cacheDuration: (1000*60*60*24*3) // 3 days,
   },
   mutations: {
     setLang(state, data){
