@@ -108,8 +108,6 @@
         })
       }
 
-      this.loadHash()
-
       this.loadTerms()
 
       const loadPhaseTable = this.$store.dispatch('loadPhaseTable')
@@ -118,6 +116,7 @@
       const loadTypeTable = this.$store.dispatch('loadTypeTable')
       Promise.all([ loadPhaseTable, loadCategoryTable, loadRegionTable, loadTypeTable ]).then(() => {
         this.$store.dispatch('loadInstrumentTable').then(() => {
+          this.loadHash()
           // standard params for "Umwelt Schweiz" view
           const hash = getHashParams()
           if(!hash.region && !hash.type && !hash.instrument && !hash.category) {
