@@ -182,9 +182,13 @@ function accentFold(inStr) {
 
 function formatAmount(n, p = 0, dp = 0, prefix = '', suffix = '') {
   if(p) n = n/Math.pow(10,p)
-  var w = n.toFixed(dp), k = w|0, b = n < 0 ? 1 : 0,
-      u = Math.abs(w-k), d = (''+u.toFixed(dp)).substr(2, dp),
-      s = ''+k, i = s.length, r = '';
+  var w = n.toFixed(dp),
+      k = parseInt(w),
+      b = n < 0 ? 1 : 0,
+      u = Math.abs(w-k),
+      d = (''+u.toFixed(dp)).substr(2, dp),
+      s = ''+k,
+      i = s.length, r = '';
   while ( (i-=3) > b ) { r = ' ' + s.substr(i, 3) + r; }
   return prefix + '' + s.substr(0, i + 3) + r + (d ? '.'+d: '') + '' + suffix;
 }
