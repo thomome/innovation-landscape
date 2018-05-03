@@ -6,31 +6,33 @@
         <v-btn depressed color="grey small lighten-2" @click="zoomOut()"><v-icon>remove</v-icon></v-btn>
       </v-btn-toggle>
     </div>
-    <svg
-      version="1.1"
-      baseProfile="full"
-      xmlns="http://www.w3.org/2000/svg"
-      width="100%" height="500px"
-      ref="chart"
-      :viewBox="viewBox"
-    >
-      <ilv-chart-y-axis
-        :chart="chart"
-      ></ilv-chart-y-axis>
-      <ilv-chart-x-axis
-        :chart="chart"
-      ></ilv-chart-x-axis>
-      <g class="data">
-        <transition-group name="fade2" tag="g">
-          <ilv-chart-bar
-            v-for="instrument in instrumentAvailable"
-            :key="'instrument-' + instrument.id"
-            :instrument="instrument"
-            :chart="chart"
-          ></ilv-chart-bar>
-        </transition-group>
-      </g>
-    </svg>
+    <div ref="svg">
+      <svg
+        version="1.1"
+        baseProfile="full"
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%" height="500px"
+        ref="chart"
+        :viewBox="viewBox"
+      >
+        <ilv-chart-y-axis
+          :chart="chart"
+        ></ilv-chart-y-axis>
+        <ilv-chart-x-axis
+          :chart="chart"
+        ></ilv-chart-x-axis>
+        <g class="data">
+          <transition-group name="fade2" tag="g">
+            <ilv-chart-bar
+              v-for="instrument in instrumentAvailable"
+              :key="'instrument-' + instrument.id"
+              :instrument="instrument"
+              :chart="chart"
+            ></ilv-chart-bar>
+          </transition-group>
+        </g>
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -156,7 +158,7 @@
         this.size.height = this.$refs.chart.clientHeight || this.$refs.chart.parentNode.clientHeight
       },
       exportSVG() {
-        const svg = this.$refs.chart.innerHTML
+        const svg = this.$refs.svg.innerHTML
         const blob = new Blob([svg], {type: "image/svg+xml;charset=UTF-8"})
         saveAs(blob, this.term('chart_name') + '.svg')
       },
