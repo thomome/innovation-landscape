@@ -158,7 +158,10 @@
         this.size.height = this.$refs.chart.clientHeight || this.$refs.chart.parentNode.clientHeight
       },
       exportSVG() {
-        const svg = this.$refs.svg.innerHTML
+        let svg = this.$refs.svg.innerHTML
+        svg = svg.replace(/\&shy\;/g, '')
+        svg = svg.replace('svg xmlns="http://www.w3.org/2000/svg"', 'svg')
+
         const blob = new Blob([svg], {type: "image/svg+xml;charset=UTF-8"})
         saveAs(blob, this.term('chart_name') + '.svg')
       },
